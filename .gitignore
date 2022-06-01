@@ -1,0 +1,5 @@
+rotation/
+raw_data/
+dir_to_ignore/
+**/__pycache__/
+.env
