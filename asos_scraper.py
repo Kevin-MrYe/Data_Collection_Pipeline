@@ -69,12 +69,15 @@ class AsosScraper:
         delay (int): The maximum time takes to find the element.
         page (int): The index of page which is currently being scraped.
         data_folder (str): The name of folder where store all scraped data.
-        
+        scraped_id_list (list): The id list of products that have beed scraped.
+        chrome_options (Options): The object for customizing ChromeDriver.
+        driver (webdriver.Chrome): The tool used to control Chrome browser
 
 
     """
     def __init__(self, homepage):
-        """"""
+        """
+        """
         self.all_product_links = []
         self.all_product_info = []
         self.homepage = homepage
@@ -97,16 +100,15 @@ class AsosScraper:
         self.chrome_options.add_argument("window-size=1920,1080")
         self.driver = webdriver.Chrome(options=self.chrome_options)
         # self.driver = webdriver.Chrome()
+        print(type(self.chrome_options))
+        print(type(self.driver))
     def get_fake_agents(self):
         with open('rotation/user_agent.txt') as f:
              fake_agents = [line.strip() for line in f.readlines()]
         return fake_agents 
 
     def load_and_accept_cookie(self): ## return annotation
-        """ 
-        Open ASOS and accept the cookies 
-
-        """
+        """Open ASOS and accept the cookies."""
         try:
             self.driver.get(self.homepage)
             accept_cookies_button = self.try_to_find_elements(
@@ -120,20 +122,14 @@ class AsosScraper:
     
 
     def try_to_find_elements(self, element_path, element_name) -> list:
-        """ 
-        Find the elements as long as they are located
+        """Find the elements as long as they are located.
 
-        Parameters:
-        ----------
-        element_path : str
-            The path of the elements to be located
-        element_name : str
-            The name of the elements
+        Args:
+            element_path (str): The path of the elements to be located
+            element_name (str): The name of the elements
 
         Returns:
-        -------
-        element : list
-            The element list found by element path
+            list: The element list found by element path
         """
         
         try:
@@ -148,14 +144,10 @@ class AsosScraper:
 
         
     def search_for(self, search_content):
-        """ 
-        Search in the search textbox and get the result url
+        """Search in the search textbox and get to the result url.
 
-        Parameters:
-        ----------
-        search_content : str
-            The product name to be search
-
+        Args:
+            search_content (str): The product name to be search.
         """
         self.driver.save_screenshot('search.png')
         search_bar = self.try_to_find_elements(
@@ -165,13 +157,10 @@ class AsosScraper:
         search_bar.send_keys(Keys.RETURN)
 
     def get_tshirt_page_links(self) -> list:
-        """
-        Get the links for products in current page.
+        """Get the links for products in current page.
         
         Returns:
-        -------
-        page_link_list : list
-            A list consist of product links in current page.  
+            list: A list consist of product links in current page.  
         """
         tshirt_elements = self.try_to_find_elements(
             "//div[@data-auto-id='productList']/section/article",
@@ -187,9 +176,8 @@ class AsosScraper:
         return page_link_list
     
     def move_to_next_page(self):
-        """ 
-        Move to the next page 
-        """
+        """ Move to the next page."""
+
         next_page_tag = self.try_to_find_elements(
             "//a[@data-auto-id='loadMoreProducts']",
             "next page tag")[0]
@@ -198,13 +186,10 @@ class AsosScraper:
         self.driver.get(next_page_link)
         
     def get_n_page_tshirt_links(self, page_nums):
-        """ 
-        Get the links for products in all N pages 
+        """Get the links for products in all N pages.
 
-        Parameters:
-        ----------
-        page_nums : int
-            The number of pages which to be extract links from
+        Args:
+            page_nums (int): The number of pages which to be extract links from.
         """
         for i in tqdm(range(0,page_nums)):
             tshirt_page_links = self.get_tshirt_page_links()
@@ -212,9 +197,8 @@ class AsosScraper:
             self.move_to_next_page()
 
     def get_all_tshirt_info(self):
-        """ 
-        Get the product infomation for all links 
-        """
+        """ Get the product infomation for all links."""
+
         i=0
         for link in tqdm(self.all_product_links[0:10]):
 
@@ -292,15 +276,11 @@ class AsosScraper:
             #     break
 
     def get_image_links_for_tshirt(self) -> list:
-        """ 
-        Get all the image links corresponding to different product item
+        """Get all the image links corresponding to different product item
         
         Returns:
-        -------
-        item_img_links : list
-            A list consist all image links for single product
+            list: A list consist all image links for single product
         """
-
         thumbnails_container = self.try_to_find_elements(
             "//ul[@class='thumbnails']",
             "thumbnails container")[0]
@@ -316,9 +296,8 @@ class AsosScraper:
         return item_img_links
     
     def create_data_folders(self):
-        """
-        Create the data folders for different product item
-        """
+        """Create the data folders for different product item."""
+
         print("Start to create folder")
         if not os.path.exists(self.data_folder):
                 os.makedirs(self.data_folder)
@@ -331,9 +310,8 @@ class AsosScraper:
 
 
     def save_json_locally(self):    
-        """ 
-        Save all the scraped data in local folders 
-        """
+        """Save all the scraped data in local folders."""
+
         print("Start to save josn locally")
         for item_dict in tqdm(self.all_product_info):
             
@@ -342,15 +320,11 @@ class AsosScraper:
                 json.dump(item_dict, f, indent=4)
 
     def download_images_locally(self):
-        """ 
-        Download all the images corresponding to different product item 
-        """
+        """Download all the images corresponding to different product item."""
+
         print("Start to save images locally")
         for item_dict in tqdm(self.all_product_info):
             image_folder_path = '/'.join([os.getcwd(), self.data_folder, item_dict['id'], 'images'])
-            # if not os.path.exists(image_folder_path):
-            #     os.makedirs(image_folder_path)
-
             i=0
             for image_url in item_dict['image_links']:
                 image_name = image_folder_path+ '/' + str(i) + '.jpg'
@@ -358,13 +332,10 @@ class AsosScraper:
                 i += 1
 
     def connect_to_rds(self):
-        """
-        Connect to AWS RDS using sqlalchemy
+        """Connect to AWS RDS using sqlalchemy.
 
         Returns:
-        ------
-        engine : sqlalchemy.engine.Engine
-            The Object used to connect to AWS RDS
+            sqlalchemy.engine.Engine: The Object used to connect to AWS RDS.
         """
 
         load_dotenv()
@@ -380,13 +351,10 @@ class AsosScraper:
         return engine
         
     def upload_data_to_rds_directly(self):
-        """
-        Upload all information to AWS RDS
+        """Upload all information to AWS RDS
 
         Returns:
-        -------
-        affected_rows : int
-            Number of rows affected by to_sql
+            int: Number of rows affected by to_sql
         """
         print("Start to upload data to rds directly")
         engine = self.connect_to_rds()
@@ -398,9 +366,8 @@ class AsosScraper:
         return affected_rows
     
     def upload_data_to_s3_directly(self):
-        """
-        Upload data to s3 directly, without saving them locally
-        """
+        """Upload data to s3 directly, without saving them locally."""
+
         print("Start to upload all info to s3")
         load_dotenv()
         s3_client = boto3.client('s3')
@@ -425,9 +392,8 @@ class AsosScraper:
 
     
     def upload_data_folder_to_s3(self):
-        """
-        Upload data floder to S3 bucket.
-        """
+        """Upload data floder to S3 bucket."""
+
         print("Start to upload data folder to s3")
         load_dotenv()
         s3_client = boto3.client('s3')
@@ -440,6 +406,7 @@ class AsosScraper:
         
 
     def get_scraped_id_list(self):
+        """Get the scraped id from RDS."""
 
         engine = self.connect_to_rds()
         print("Connected to RDS")
