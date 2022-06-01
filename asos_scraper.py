@@ -6,6 +6,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.chrome.options import Options
 from sqlalchemy import create_engine
+from sqlalchemy import engine
 from dotenv import load_dotenv
 from urllib import request
 import pandas as pd
@@ -19,47 +20,6 @@ class AsosScraper:
     """
     A class used to scrape ASOS(a British online fashion and cosmetic retailer).
     
-        Attributes:
-    ----------
-    all_links : list
-        A list of all product links
-    all_info : list
-        A list of all product information
-    delay : int
-        The maximum time that Selenium takes to wait for an element (default 10)
-    page : int
-        The page number of the current page being scraped (start from 1)
-    data_folder : str
-        The name of folder which is used to store all scraped data
-    driver : webdriver.Chrome
-        The tool used to control Chrome browser
-
-    Methods:
-    -------
-    load_and_accept_cookie(url)
-        Get to the main url and accept cookie
-    try_to_find_element(element_path, element_name)
-        Wait only as long as required and locate the element in the path
-    search_for(search_content)
-        Search the wanted product in textbar and get to the result url
-    get_tshirt_page_links()
-        Get the links for products in current page.
-    move_to_next_page()
-        Move to the next page
-    get_n_page_tshirt_links(page_nums)
-        Get the links for products in all N pages
-    get_all_tshirt_info()
-        Get the product infomation for all links
-    get_image_links_for_tshirt()
-        Get all the image links corresponding to different product item
-    create_data_folders()
-        Create the data folders for different product item
-    save_data_locally()
-        Save all the scraped data in local folder
-    download_images()
-        Download all the images corresponding to different product item
-
-
     Args:
         homepage(str): Homepage url of ASOS.
 
@@ -85,7 +45,6 @@ class AsosScraper:
         self.page = 1
         self.data_folder = 'raw_data'
         self.scraped_id_list = []
-        # self.fake_agents = self.get_fake_agents()
         self.chrome_options = Options()
         # chrome_options = Options()
         self.chrome_options.add_argument('--ignore-certificate-errors')
@@ -102,12 +61,13 @@ class AsosScraper:
         # self.driver = webdriver.Chrome()
         print(type(self.chrome_options))
         print(type(self.driver))
+
     def get_fake_agents(self):
         with open('rotation/user_agent.txt') as f:
              fake_agents = [line.strip() for line in f.readlines()]
         return fake_agents 
 
-    def load_and_accept_cookie(self): ## return annotation
+    def load_and_accept_cookie(self) -> None: ## return annotation
         """Open ASOS and accept the cookies."""
         try:
             self.driver.get(self.homepage)
@@ -117,9 +77,7 @@ class AsosScraper:
             
             accept_cookies_button.click()
         except:
-            print("No cookie button")
-        # print(self.chrome_options.arguments)
-    
+            print("No cookie button")   
 
     def try_to_find_elements(self, element_path, element_name) -> list:
         """Find the elements as long as they are located.
@@ -137,13 +95,13 @@ class AsosScraper:
                         until(EC.presence_of_all_elements_located(
                         (By.XPATH, element_path)))
         except TimeoutException:
-            print(f"Loading {element_name} took too much time, check the element path!")
+            print(f"Loading {element_name} took too much time,\
+                check the element path!")
             element = []
-        # print(type(element))
         return element
 
         
-    def search_for(self, search_content):
+    def search_for(self, search_content) -> None:
         """Search in the search textbox and get to the result url.
 
         Args:
@@ -170,12 +128,13 @@ class AsosScraper:
             a_tag = tshirt.find_element(By.TAG_NAME,'a')
             item_link = a_tag.get_attribute('href')
             page_link_list.append(item_link)
-        print(f'Now in page {self.page}.There are {len(page_link_list)} T-shirts !')
+        print(f'Now in page {self.page}.\
+            There are {len(page_link_list)} T-shirts !')
         self.page += 1
 
         return page_link_list
     
-    def move_to_next_page(self):
+    def move_to_next_page(self) -> None:
         """ Move to the next page."""
 
         next_page_tag = self.try_to_find_elements(
@@ -185,7 +144,7 @@ class AsosScraper:
         print(f"Turn to Page {self.page} successfully !")
         self.driver.get(next_page_link)
         
-    def get_n_page_tshirt_links(self, page_nums):
+    def get_n_page_tshirt_links(self, page_nums) -> None:
         """Get the links for products in all N pages.
 
         Args:
@@ -196,7 +155,7 @@ class AsosScraper:
             self.all_product_links.extend(tshirt_page_links)
             self.move_to_next_page()
 
-    def get_all_tshirt_info(self):
+    def get_all_tshirt_info(self) -> None:
         """ Get the product infomation for all links."""
 
         i=0
@@ -204,37 +163,38 @@ class AsosScraper:
 
             self.driver.get(link)   
 
-            product_id_element = self.try_to_find_elements(
+            product_id_ele = self.try_to_find_elements(
                 "//div[@class='product-code']/p[1]",
                 "product_id")
-            product_id = product_id_element[0].text if product_id_element != [] else None
+            product_id = product_id_ele[0].text if product_id_ele != [] else None
             # if product_id in self.scraped_id_list or product_id == None:
             #     print("This product has benn scraped before")
             #     continue
-            name_element = self.try_to_find_elements(
+            name_ele = self.try_to_find_elements(
                 "//div[@id='aside-content']/div/h1",
                 "name")
-            brand_element = self.try_to_find_elements(
+            brand_ele = self.try_to_find_elements(
                 "//div[@class='product-description']/p[1]/a[2]/strong",
                 "brand")
-            price_element = self.try_to_find_elements(
+            price_ele = self.try_to_find_elements(
                 "//span[@data-id='current-price']",
                 "price")
-            colour_element = self.try_to_find_elements(
+            colour_ele = self.try_to_find_elements(
                 "//span[@class='product-colour']",
                 "colour")
-            rating_avg_element = self.driver.find_elements(
+            rating_avg_ele = self.driver.find_elements(
                 By.XPATH,"//div[@class='numeric-rating']")
-            rating_nums_element = self.driver.find_elements(
+            rating_nums_ele = self.driver.find_elements(
                 By.XPATH,"//div[@class='total-reviews']")
 
           
-            name = name_element[0].text if name_element != [] else None
-            brand = brand_element[0].text if brand_element != [] else None
-            price = price_element[0].text.replace('Now ','') if price_element != [] else None
-            colour = colour_element[0].text if colour_element != [] else None
-            rating_avg = rating_avg_element[0].text if rating_avg_element != [] else None
-            rating_nums = rating_nums_element[0].text.replace('(','').replace(')','') if rating_nums_element != [] else None
+            name = name_ele[0].text if name_ele != [] else None
+            brand = brand_ele[0].text if brand_ele != [] else None
+            price = price_ele[0].text.replace('Now ','') if price_ele != [] else None
+            colour = colour_ele[0].text if colour_ele != [] else None
+            rating_avg = rating_avg_ele[0].text if rating_avg_ele != [] else None
+            rating_nums_temp = rating_nums_ele[0].text if rating_nums_ele != [] else None
+            rating_nums = rating_nums_temp.replace('(','').replace(')','') 
 
             image_links = self.get_image_links_for_tshirt()
             item_dict = {}
@@ -276,7 +236,7 @@ class AsosScraper:
             #     break
 
     def get_image_links_for_tshirt(self) -> list:
-        """Get all the image links corresponding to different product item
+        """Get all the image links corresponding to different product item.
         
         Returns:
             list: A list consist all image links for single product
@@ -289,13 +249,14 @@ class AsosScraper:
         thumbnails_elements = thumbnails_container.find_elements(By.XPATH,".//img")
         for element in thumbnails_elements:
             thumbnail_img_link = element.get_attribute('src')
-            full_image_link = thumbnail_img_link.split('$')[0]+'$n_640w$&amp;wid=513&amp;fit=constrain'
+            full_image_link = (thumbnail_img_link.split('$')[0]
+                                +'$n_640w$&amp;wid=513&amp;fit=constrain')
             item_img_links.append(full_image_link)
         
 
         return item_img_links
     
-    def create_data_folders(self):
+    def create_data_folders(self) -> None:
         """Create the data folders for different product item."""
 
         print("Start to create folder")
@@ -304,34 +265,46 @@ class AsosScraper:
         
         for item_dict in tqdm(self.all_product_info):
        
-            image_folder_path = '/'.join([os.getcwd(), self.data_folder, item_dict['id'], 'images'])
+            image_folder_path = '/'.join([
+                os.getcwd(), 
+                self.data_folder, 
+                item_dict['id'], 
+                'images'])
             if not os.path.exists(image_folder_path):
                 os.makedirs(image_folder_path)
 
 
-    def save_json_locally(self):    
+    def save_json_locally(self) -> None:    
         """Save all the scraped data in local folders."""
 
         print("Start to save josn locally")
         for item_dict in tqdm(self.all_product_info):
             
-            data_point_path = '/'.join([os.getcwd(), self.data_folder, item_dict['id']])
+            data_point_path = '/'.join([
+                os.getcwd(), 
+                self.data_folder, 
+                item_dict['id']])
+
             with open(data_point_path +'/data.json',mode='w+') as f:
                 json.dump(item_dict, f, indent=4)
 
-    def download_images_locally(self):
+    def download_images_locally(self) -> None:
         """Download all the images corresponding to different product item."""
 
         print("Start to save images locally")
         for item_dict in tqdm(self.all_product_info):
-            image_folder_path = '/'.join([os.getcwd(), self.data_folder, item_dict['id'], 'images'])
+            image_folder_path = '/'.join([
+                os.getcwd(), 
+                self.data_folder, 
+                item_dict['id'], 
+                'images'])
             i=0
             for image_url in item_dict['image_links']:
                 image_name = image_folder_path+ '/' + str(i) + '.jpg'
                 request.urlretrieve(image_url,image_name)
                 i += 1
 
-    def connect_to_rds(self):
+    def connect_to_rds(self) -> engine.Engine:
         """Connect to AWS RDS using sqlalchemy.
 
         Returns:
@@ -346,11 +319,12 @@ class AsosScraper:
         PASSWORD = os.getenv('RDS_PASSWORD')
         DATABASE = 'asos_scraper'
         PORT = 5432
-        engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{ENDPOINT}:{PORT}/{DATABASE}")
+        engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@\
+            {ENDPOINT}:{PORT}/{DATABASE}")
 
         return engine
         
-    def upload_data_to_rds_directly(self):
+    def upload_data_to_rds_directly(self) -> int:
         """Upload all information to AWS RDS
 
         Returns:
@@ -365,7 +339,7 @@ class AsosScraper:
 
         return affected_rows
     
-    def upload_data_to_s3_directly(self):
+    def upload_data_to_s3_directly(self) -> None:
         """Upload data to s3 directly, without saving them locally."""
 
         print("Start to upload all info to s3")
@@ -377,7 +351,10 @@ class AsosScraper:
         for item in tqdm(self.all_product_info):
             json_object = json.dumps(item, indent=4)
             json_path = os.path.join('test_data',item['id'],'data.json')
-            s3_client.put_object(Body=json_object, Bucket=bucket_name, Key=json_path)
+            s3_client.put_object(
+                Body=json_object, 
+                Bucket=bucket_name, 
+                Key=json_path)
 
             image_links = item['image_links']
             i=0
@@ -385,13 +362,16 @@ class AsosScraper:
                 img_object = request.urlopen(link).read()
                 img_name = str(i)+'.jpg'
                 img_path = os.path.join('test_data',item['id'],'images',img_name)
-                s3_client.put_object(Body=img_object, Bucket=bucket_name, Key=img_path)
+                s3_client.put_object(
+                    Body=img_object, 
+                    Bucket=bucket_name, 
+                    Key=img_path)
                 i +=1
 
 
 
     
-    def upload_data_folder_to_s3(self):
+    def upload_data_folder_to_s3(self) -> None:
         """Upload data floder to S3 bucket."""
 
         print("Start to upload data folder to s3")
@@ -405,7 +385,7 @@ class AsosScraper:
                 s3_client.upload_file(local_path, bucket_name, local_path)
         
 
-    def get_scraped_id_list(self):
+    def get_scraped_id_list(self) -> None:
         """Get the scraped id from RDS."""
 
         engine = self.connect_to_rds()
