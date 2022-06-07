@@ -1,3 +1,4 @@
+from tkinter.messagebox import NO
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -41,6 +42,7 @@ class Scraper:
         self.page = 1
         self.data_folder = 'asos/test_data'
         self.scraped_id_list = []
+        self.engine = None
         self.chrome_options = Options()
         # chrome_options = Options()
         self.chrome_options.add_argument('--ignore-certificate-errors')
@@ -104,7 +106,7 @@ class Scraper:
         search_bar.send_keys(search_content)
         search_bar.send_keys(Keys.RETURN)
 
-    def get_tshirt_page_links(self) -> list:
+    def get_one_page_item_links(self) -> list:
         """Get the links for products in current page.
         
         Returns:
@@ -131,7 +133,7 @@ class Scraper:
         next_page_link = next_page_tag.get_attribute('href')
         self.driver.get(next_page_link)
         
-    def get_n_page_tshirt_links(self, page_nums: int) -> None:
+    def get_n_page_item_links(self, page_nums: int) -> None:
         """Get the links for products in all N pages.
 
         Args:
@@ -139,19 +141,95 @@ class Scraper:
         """
         print("Start to collect product links...")
         for i in tqdm(range(0,page_nums)):
-            tshirt_page_links = self.get_tshirt_page_links()
+            tshirt_page_links = self.get_one_page_item_links()
             self.all_product_links.extend(tshirt_page_links)
             self.move_to_next_page()
+    
+    def push_data_to_dict(self, product_id: str, link: str) -> dict:
+        name_ele = self.try_to_find_elements(
+                "//div[@id='aside-content']/div/h1",
+                "name")
+        brand_ele = self.try_to_find_elements(
+            "//div[@class='product-description']/p[1]/a[2]/strong",
+            "brand")
+        price_ele = self.try_to_find_elements(
+            "//span[@data-id='current-price']",
+            "price")
+        colour_ele = self.try_to_find_elements(
+            "//span[@class='product-colour']",
+            "colour")
+        rating_avg_ele = self.driver.find_elements(
+            By.XPATH,"//div[@class='numeric-rating']")
+        rating_nums_ele = self.driver.find_elements(
+            By.XPATH,"//div[@class='total-reviews']")
 
-    def get_all_tshirt_info(self) -> None:
+        name = name_ele[0].text if name_ele != [] else None
+        brand = brand_ele[0].text if brand_ele != [] else None
+        colour = colour_ele[0].text if colour_ele != [] else None
+        rating_avg = rating_avg_ele[0].text if rating_avg_ele != [] else None
+        if price_ele != []:
+            price = price_ele[0].text.replace('Now ','')
+        else: 
+            price = None
+
+        if rating_nums_ele != []:
+            rating_nums = rating_nums_ele[0].text.replace('(','').replace(')','')
+        else:
+            rating_nums = None
+
+
+        image_links = self.get_image_links_for_item()
+        item_dict = {}
+        item_dict.fromkeys([
+            'id',
+            'name',
+            'item_link',
+            'brand',
+            'price',
+            'colour',
+            'rating_avg',
+            'rating_nums',
+            'image_links'
+            ])
+        item_dict['id'] = product_id
+        item_dict['name'] = name
+        item_dict['item_link'] = link
+        item_dict['brand'] = brand
+        item_dict['price'] = price
+        item_dict['colour'] = colour
+        item_dict['rating_avg'] = rating_avg
+        item_dict['rating_nums'] = rating_nums
+        item_dict['image_links'] = image_links
+        print(f'The product id is: {product_id}')
+        print(f"The product name is: {name}")
+        print(f"The link is: {link}")
+        print(f'The brand is: {brand}')
+        print(f'The price is: {price}')
+        print(f"The colour is: {colour}")
+        print(f'The average rating is: {rating_avg}')
+        print(f'The rating numbers is: {rating_nums}')
+        print(f"The image links is: {image_links}")
+
+        return item_dict
+    
+    def save_item_data(self, item_dict: dict) -> None:
+        if self.save_locally == True:
+            self.save_json_locally(item_dict)
+            self.download_images_locally(item_dict)
+        elif self.save_locally == False:
+            self.upload_data_to_rds_directly(self.engine,item_dict)
+            self.upload_data_to_s3_directly(item_dict)
+
+    def get_all_item_info(self) -> None:
         """ Get the product infomation for all links."""
         print("Start to extract product information...")
         if len(self.all_product_links) < self.target_nums:
             raise ValueError("The target nums can't be less than link nums")
-        i=0
+        i=1
         for link in tqdm(self.all_product_links[0:self.target_nums]):
 
             self.driver.get(link)
+            #check whether the id was scraped before
             product_id_ele = self.try_to_find_elements(
                 "//div[@class='product-code']/p[1]",
                 "product_id")
@@ -163,80 +241,19 @@ class Scraper:
                 print("This product details can't be extracted")
                 print(f"The link is {link}")
                 continue
-            name_ele = self.try_to_find_elements(
-                "//div[@id='aside-content']/div/h1",
-                "name")
-            brand_ele = self.try_to_find_elements(
-                "//div[@class='product-description']/p[1]/a[2]/strong",
-                "brand")
-            price_ele = self.try_to_find_elements(
-                "//span[@data-id='current-price']",
-                "price")
-            colour_ele = self.try_to_find_elements(
-                "//span[@class='product-colour']",
-                "colour")
-            rating_avg_ele = self.driver.find_elements(
-                By.XPATH,"//div[@class='numeric-rating']")
-            rating_nums_ele = self.driver.find_elements(
-                By.XPATH,"//div[@class='total-reviews']")
 
-            name = name_ele[0].text if name_ele != [] else None
-            brand = brand_ele[0].text if brand_ele != [] else None
-            colour = colour_ele[0].text if colour_ele != [] else None
-            rating_avg = rating_avg_ele[0].text if rating_avg_ele != [] else None
-            if price_ele != []:
-                price = price_ele[0].text.replace('Now ','')
-            else: 
-                price = None
-
-            if rating_nums_ele != []:
-                rating_nums = rating_nums_ele[0].text.replace('(','').replace(')','')
-            else:
-                rating_nums = None
-
-
-            image_links = self.get_image_links_for_tshirt()
-            item_dict = {}
-            item_dict.fromkeys([
-                'id',
-                'name',
-                'item_link',
-                'brand',
-                'price',
-                'colour',
-                'rating_avg',
-                'rating_nums',
-                'image_links'
-                ])
-            i+=1
             print("---------------------------------")
             print(f"NO.{i}",end=" ")
-            print(f'The product id is: {product_id}')
-            print(f"The product name is: {name}")
-            print(f"The link is: {link}")
-            print(f'The brand is: {brand}')
-            print(f'The price is: {price}')
-            print(f"The colour is: {colour}")
-            print(f'The average rating is: {rating_avg}')
-            print(f'The rating numbers is: {rating_nums}')
-            print(f"The image links is: {image_links}")
-            item_dict['id'] = product_id
-            item_dict['name'] = name
-            item_dict['item_link'] = link
-            item_dict['brand'] = brand
-            item_dict['price'] = price
-            item_dict['colour'] = colour
-            item_dict['rating_avg'] = rating_avg
-            item_dict['rating_nums'] = rating_nums
-            item_dict['image_links'] = image_links
+            #push data into a dictionary
+            item_dict = self.push_data_to_dict(product_id, link)
+
+            # #save data
+            self.save_item_data(item_dict)
             self.all_product_info.append(item_dict)
             self.scraped_id_list.append(product_id)
-            if self.save_locally == False:
-                pass
-            # if i==10:
-            #     break
+            i+=1
 
-    def get_image_links_for_tshirt(self) -> list:
+    def get_image_links_for_item(self) -> list:
         """Get all the image links corresponding to different product item.
         
         Returns:
@@ -268,11 +285,11 @@ class Scraper:
             # print(self.scraped_id_list)
 
         elif self.save_locally == False:
-            engine = self.connect_to_rds()
+            self.engine = self.connect_to_rds()
             try:
                 df_scraped_id = pd.read_sql_query(
                     'SELECT id FROM test_scraper',
-                     engine)
+                     self.engine)
 
                 self.scraped_id_list = df_scraped_id['id'].values.tolist()
             except:

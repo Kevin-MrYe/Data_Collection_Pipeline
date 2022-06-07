@@ -4,44 +4,39 @@ from dotenv import load_dotenv
 import boto3
 import os
 import pandas as pd
-from tqdm import tqdm
 import json
 from urllib import request
-from typing import Optional
 
 class LoaderMixin:
 
-    def connect_to_rds(self, save_locally: bool) -> Optional[engine.Engine]:
+    def connect_to_rds(self) -> engine.Engine:
         """Connect to AWS RDS using sqlalchemy.
 
         Returns:
             sqlalchemy.engine.Engine: The Object used to connect to AWS RDS.
         """
-        if save_locally == False:
-            load_dotenv()
-            DATABASE_TYPE = 'postgresql'
-            DBAPI = 'psycopg2'
-            ENDPOINT = os.getenv('RDS_ENDPOINT')
-            USER = 'postgres'
-            PASSWORD = os.getenv('RDS_PASSWORD')
-            DATABASE = 'asos_scraper'
-            PORT = 5432
-            path = (f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@"
-                    +f"{ENDPOINT}:{PORT}/{DATABASE}")
-            engine = create_engine(path)
-        elif save_locally == True:
-            engine = None
+
+        load_dotenv()
+        DATABASE_TYPE = 'postgresql'
+        DBAPI = 'psycopg2'
+        ENDPOINT = os.getenv('RDS_ENDPOINT')
+        USER = 'postgres'
+        PASSWORD = os.getenv('RDS_PASSWORD')
+        DATABASE = 'asos_scraper'
+        PORT = 5432
+        path = (f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@"
+                +f"{ENDPOINT}:{PORT}/{DATABASE}")
+        engine = create_engine(path)
 
         return engine
         
-    def upload_data_to_rds_directly(self, item_dict: dict) -> int:
+    def upload_data_to_rds_directly(self, engine: engine.Engine, item_dict: dict) -> int:
         """Upload all information to AWS RDS
 
         Returns:
             int: Number of rows affected by to_sql
         """
         print("Start to upload data to rds directly")
-        
         df = pd.DataFrame(item_dict)
         df.set_index('id',inplace=True)
         table_name =  'test_scraper'
