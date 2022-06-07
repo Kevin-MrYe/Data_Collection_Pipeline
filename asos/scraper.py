@@ -1,4 +1,3 @@
-from cgitb import text
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -6,19 +5,11 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.chrome.options import Options
-from sqlalchemy import create_engine
-from sqlalchemy import engine
-from dotenv import load_dotenv
-from urllib import request
-import traceback
-import pandas as pd
-import numpy as np
 from tqdm import tqdm
-import json
-import boto3
 import os
+import pandas as pd
 
-class AsosScraper:
+class Scraper:
     """
     A class used to scrape ASOS(a British online fashion and cosmetic retailer).
     
@@ -38,7 +29,7 @@ class AsosScraper:
 
 
     """
-    def __init__(self, homepage, save_locally, target_nums):
+    def __init__(self, homepage: str, save_locally: bool, target_nums: int):
         """
         """
         self.homepage = homepage
@@ -48,7 +39,7 @@ class AsosScraper:
         self.all_product_info = []
         self.delay = 10
         self.page = 1
-        self.data_folder = 'raw_data_1'
+        self.data_folder = 'asos/test_data'
         self.scraped_id_list = []
         self.chrome_options = Options()
         # chrome_options = Options()
@@ -65,11 +56,6 @@ class AsosScraper:
         self.driver = webdriver.Chrome(options=self.chrome_options)
         # self.driver = webdriver.Chrome()
 
-    def get_fake_agents(self):
-        with open('rotation/user_agent.txt') as f:
-             fake_agents = [line.strip() for line in f.readlines()]
-        return fake_agents 
-
     def load_and_accept_cookie(self) -> None: ## return annotation
         """Open ASOS and accept the cookies."""
         print("Start to load and accept cookie...")
@@ -83,7 +69,7 @@ class AsosScraper:
         except:
             print("No cookie button")   
 
-    def try_to_find_elements(self, element_path, element_name) -> list:
+    def try_to_find_elements(self, element_path: str, element_name: str) -> list:
         """Find the elements as long as they are located.
 
         Args:
@@ -105,7 +91,7 @@ class AsosScraper:
         return element
 
         
-    def search_for(self, search_content) -> None:
+    def search_for(self, search_content: str) -> None:
         """Search in the search textbox and get to the result url.
 
         Args:
@@ -145,7 +131,7 @@ class AsosScraper:
         next_page_link = next_page_tag.get_attribute('href')
         self.driver.get(next_page_link)
         
-    def get_n_page_tshirt_links(self, page_nums) -> None:
+    def get_n_page_tshirt_links(self, page_nums: int) -> None:
         """Get the links for products in all N pages.
 
         Args:
@@ -165,8 +151,7 @@ class AsosScraper:
         i=0
         for link in tqdm(self.all_product_links[0:self.target_nums]):
 
-            self.driver.get(link)   
-
+            self.driver.get(link)
             product_id_ele = self.try_to_find_elements(
                 "//div[@class='product-code']/p[1]",
                 "product_id")
@@ -246,6 +231,8 @@ class AsosScraper:
             item_dict['image_links'] = image_links
             self.all_product_info.append(item_dict)
             self.scraped_id_list.append(product_id)
+            if self.save_locally == False:
+                pass
             # if i==10:
             #     break
 
@@ -270,141 +257,6 @@ class AsosScraper:
 
         return item_img_links
     
-    def create_data_folders(self) -> None:
-        """Create the data folders for different product item."""
-
-        print("Start to create folder...")
-        if not os.path.exists(self.data_folder):
-                os.makedirs(self.data_folder)
-        
-        for item_dict in tqdm(self.all_product_info):
-       
-            image_folder_path = '/'.join([
-                os.getcwd(), 
-                self.data_folder, 
-                item_dict['id'], 
-                'images'])
-            if not os.path.exists(image_folder_path):
-                os.makedirs(image_folder_path)
-
-
-    def save_json_locally(self) -> None:    
-        """Save all the scraped data in local folders."""
-
-        print("Start to save josn locally...")
-        for item_dict in tqdm(self.all_product_info):
-            
-            data_point_path = '/'.join([
-                os.getcwd(), 
-                self.data_folder, 
-                item_dict['id']])
-
-            with open(data_point_path +'/data.json',mode='w+') as f:
-                json.dump(item_dict, f, indent=4)
-        csv_path = self.data_folder+'/final_data.csv'
-        df = pd.DataFrame(self.all_product_info)
-        if os.path.exists(csv_path):
-            df.to_csv(csv_path, mode='a',header=False,index=False)
-        else:
-            df.to_csv(csv_path,mode='a',index=False)
-
-    def download_images_locally(self) -> None:
-        """Download all the images corresponding to different product item."""
-
-        print("Start to save images locally...")
-        for item_dict in tqdm(self.all_product_info):
-            image_folder_path = '/'.join([
-                os.getcwd(), 
-                self.data_folder, 
-                item_dict['id'], 
-                'images'])
-            i=0
-            for image_url in item_dict['image_links']:
-                image_name = image_folder_path+ '/' + str(i) + '.jpg'
-                request.urlretrieve(image_url,image_name)
-                i += 1
-
-    def connect_to_rds(self) -> engine.Engine:
-        """Connect to AWS RDS using sqlalchemy.
-
-        Returns:
-            sqlalchemy.engine.Engine: The Object used to connect to AWS RDS.
-        """
-
-        load_dotenv()
-        DATABASE_TYPE = 'postgresql'
-        DBAPI = 'psycopg2'
-        ENDPOINT = os.getenv('RDS_ENDPOINT')
-        USER = 'postgres'
-        PASSWORD = os.getenv('RDS_PASSWORD')
-        DATABASE = 'asos_scraper'
-        PORT = 5432
-        engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{ENDPOINT}:{PORT}/{DATABASE}")
-
-        return engine
-        
-    def upload_data_to_rds_directly(self) -> int:
-        """Upload all information to AWS RDS
-
-        Returns:
-            int: Number of rows affected by to_sql
-        """
-        print("Start to upload data to rds directly")
-        engine = self.connect_to_rds()
-        
-        df = pd.DataFrame(self.all_product_info)
-        df.set_index('id',inplace=True)
-        table_name =  'test_scraper'
-        affected_rows = df.to_sql(table_name, engine, if_exists='append')
-
-        return affected_rows
-    
-    def upload_data_to_s3_directly(self) -> None:
-        """Upload data to s3 directly, without saving them locally."""
-
-        print("Start to upload all info to s3")
-        load_dotenv()
-        s3_client = boto3.client('s3')
-        bucket_name = os.getenv('BUCKET_NAME')
-        # self.get_scraped_id_list()
-
-        for item in tqdm(self.all_product_info):
-            json_object = json.dumps(item, indent=4)
-            json_path = os.path.join('test_data',item['id'],'data.json')
-            s3_client.put_object(
-                Body=json_object, 
-                Bucket=bucket_name, 
-                Key=json_path)
-
-            image_links = item['image_links']
-            i=0
-            for link in image_links:
-                img_object = request.urlopen(link).read()
-                img_name = str(i)+'.jpg'
-                img_path = os.path.join('test_data',item['id'],'images',img_name)
-                s3_client.put_object(
-                    Body=img_object, 
-                    Bucket=bucket_name, 
-                    Key=img_path)
-                i +=1
-
-
-
-    
-    def upload_data_folder_to_s3(self) -> None:
-        """Upload data floder to S3 bucket."""
-
-        print("Start to upload data folder to s3")
-        load_dotenv()
-        s3_client = boto3.client('s3')
-        bucket_name = os.getenv('BUCKET_NAME')
-        for root, dirs, files in os.walk(self.data_folder):
-            for filename in files:
-
-                local_path = os.path.join(root,filename)
-                s3_client.upload_file(local_path, bucket_name, local_path)
-        
-
     def get_scraped_id_list(self) -> None:
         """Get the scraped id from RDS."""
         print("Strat to get scraped id list...")
@@ -425,53 +277,3 @@ class AsosScraper:
                 self.scraped_id_list = df_scraped_id['id'].values.tolist()
             except:
                 self.scraped_id_list = []
-    
-    def save_all_scraped_data(self) -> None:
-        """Save data locally or on the clound"""
-        if self.save_locally == True:
-            try:
-                asos_scraper.get_all_tshirt_info()
-            ## if exception was raised, save current data locally.
-            except Exception:
-                print(traceback.format_exc())
-                asos_scraper.create_data_folders()
-                asos_scraper.save_json_locally()
-                asos_scraper.download_images_locally()
-            ## if no exception, save all data locally.
-            else:
-                asos_scraper.create_data_folders()
-                asos_scraper.save_json_locally()
-                asos_scraper.download_images_locally()
-
-        elif self.save_locally == False:
-            try:
-                asos_scraper.get_all_tshirt_info()
-            ## if exception was raised, save current data on the clound.
-            except Exception:
-                print(traceback.format_exc())
-                asos_scraper.upload_data_to_rds_directly()
-                asos_scraper.upload_data_to_s3_directly()
-            ## if no exception, save all data on the clound.
-            else:
-                asos_scraper.upload_data_to_rds_directly()
-                asos_scraper.upload_data_to_s3_directly()
-        print("All done !!!")
-
-
-
-if __name__ == '__main__':
-
-    ##True save data locally, False save data to cloud.
-    save_locally = True
-    asos_scraper = AsosScraper("https://www.asos.com/",save_locally,20)
-    # print(asos_scraper.connect_to_rds().connect())
-    asos_scraper.get_scraped_id_list()
-    asos_scraper.load_and_accept_cookie()
-    asos_scraper.search_for("T-shirt for men")
-    asos_scraper.get_n_page_tshirt_links(1)
-    asos_scraper.save_all_scraped_data()
-
-    
-
-    # asos_scraper.upload_data_folder_to_s3()
-

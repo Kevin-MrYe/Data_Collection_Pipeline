@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch
-from asos_scraper import AsosScraper
+from asos.asos_scraper import AsosScraper
 import sqlalchemy
 
 
