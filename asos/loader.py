@@ -6,6 +6,7 @@ import os
 import pandas as pd
 import json
 from urllib import request
+from tqdm import tqdm
 
 class LoaderMixin:
 
@@ -13,7 +14,7 @@ class LoaderMixin:
         """Connect to AWS RDS using sqlalchemy.
 
         Returns:
-            sqlalchemy.engine.Engine: The Object used to connect to AWS RDS.
+            sqlalchemy.engine.Engine: The Engine used to connect to AWS RDS.
         """
 
         load_dotenv()
@@ -36,8 +37,8 @@ class LoaderMixin:
         Returns:
             int: Number of rows affected by to_sql
         """
-        print("Start to upload data to rds directly")
-        df = pd.DataFrame(item_dict)
+        print("Start to upload data to rds directly...")
+        df = pd.DataFrame.from_dict(item_dict,orient='index').transpose()
         df.set_index('id',inplace=True)
         table_name =  'test_scraper'
         affected_rows = df.to_sql(table_name, engine, if_exists='append')
@@ -47,7 +48,7 @@ class LoaderMixin:
     def upload_data_to_s3_directly(self, item_dict: dict) -> None:
         """Upload data to s3 directly, without saving them locally."""
 
-        print("Start to upload all info to s3")
+        print("Start to upload data to s3 directly...")
         load_dotenv()
         s3_client = boto3.client('s3')
         bucket_name = os.getenv('BUCKET_NAME')
@@ -74,6 +75,50 @@ class LoaderMixin:
                 Key=img_path)
             i +=1
 
+    def upload_all_data_to_rds_directly(self) -> int:
+        """Upload all information to AWS RDS
+
+        Returns:
+            int: Number of rows affected by to_sql
+        """
+        print("Start to upload data to rds directly")
+        engine = self.connect_to_rds()
+        
+        df = pd.DataFrame(self.all_product_info)
+        df.set_index('id',inplace=True)
+        table_name =  'test_scraper'
+        affected_rows = df.to_sql(table_name, engine, if_exists='append')
+
+        return affected_rows
+    
+    def upload_all_data_to_s3_directly(self) -> None:
+        """Upload data to s3 directly, without saving them locally."""
+
+        print("Start to upload all info to s3")
+        load_dotenv()
+        s3_client = boto3.client('s3')
+        bucket_name = os.getenv('BUCKET_NAME')
+        # self.get_scraped_id_list()
+
+        for item in tqdm(self.all_product_info):
+            json_object = json.dumps(item, indent=4)
+            json_path = os.path.join('test_data',item['id'],'data.json')
+            s3_client.put_object(
+                Body=json_object, 
+                Bucket=bucket_name, 
+                Key=json_path)
+
+            image_links = item['image_links']
+            i=0
+            for link in image_links:
+                img_object = request.urlopen(link).read()
+                img_name = str(i)+'.jpg'
+                img_path = os.path.join('test_data',item['id'],'images',img_name)
+                s3_client.put_object(
+                    Body=img_object, 
+                    Bucket=bucket_name, 
+                    Key=img_path)
+                i +=1
 
 
     

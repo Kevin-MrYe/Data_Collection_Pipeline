@@ -16,16 +16,22 @@ class AsosScraper(Scraper, TransformerMixin, LoaderMixin):
         asos_scraper.search_for("T-shirt for men")
         asos_scraper.get_n_page_item_links(1)
         asos_scraper.get_all_item_info()
+
+        ##batch process -- locally
         # asos_scraper.create_data_folders()
         # asos_scraper.save_all_json_locally()
         # asos_scraper.download__all_images_locally()
+
+        ##stream process -- cloud
+        # asos_scraper.upload_all_data_to_rds_directly()
+        # asos_scraper.upload_all_data_to_s3_directly()
 
 
 
 
 
 if __name__ == '__main__':
-    save_locally = True
+    save_locally = False
     asos_scraper = AsosScraper("https://www.asos.com/",save_locally,10)
     asos_scraper.run_scraper()
     

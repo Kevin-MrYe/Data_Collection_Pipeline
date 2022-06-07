@@ -218,7 +218,7 @@ class Scraper:
             self.download_images_locally(item_dict)
         elif self.save_locally == False:
             self.upload_data_to_rds_directly(self.engine,item_dict)
-            self.upload_data_to_s3_directly(item_dict)
+            # self.upload_data_to_s3_directly(item_dict)
 
     def get_all_item_info(self) -> None:
         """ Get the product infomation for all links."""
