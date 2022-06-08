@@ -34,6 +34,10 @@ class LoaderMixin:
     def upload_data_to_rds_directly(self, engine: engine.Engine, item_dict: dict) -> int:
         """Upload all information to AWS RDS
 
+        Args:
+            engine (engine.Engine): The Engine used to connect to AWS RDS.
+            item_dict (dict): The dictionary to be uploaded to AWS RDS.
+
         Returns:
             int: Number of rows affected by to_sql
         """
@@ -46,8 +50,11 @@ class LoaderMixin:
         return affected_rows
     
     def upload_data_to_s3_directly(self, item_dict: dict) -> None:
-        """Upload data to s3 directly, without saving them locally."""
-
+        """Upload data to s3 directly, without saving them locally.
+        
+        Args:
+            item_dict (dict): The dictionary to be uploaded to AWS S3.
+        """
         print("Start to upload data to s3 directly...")
         load_dotenv()
         s3_client = boto3.client('s3')
@@ -120,8 +127,6 @@ class LoaderMixin:
                     Key=img_path)
                 i +=1
 
-
-    
     def upload_data_folder_to_s3(self) -> None:
         """Upload data floder to S3 bucket."""
 

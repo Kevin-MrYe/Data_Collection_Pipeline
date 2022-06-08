@@ -12,11 +12,10 @@ import pandas as pd
 
 class Scraper:
     """
-    A class used to scrape ASOS(a British online fashion and cosmetic retailer).
+    .
     
     Args:
         homepage(str): Homepage url of ASOS.
-        save_locally(bool): True means save data locally, otherwise on the clound.
         target_nums(int): The number of items to be extracted.
 
     Attributes:
@@ -32,11 +31,10 @@ class Scraper:
 
 
     """
-    def __init__(self, homepage: str, save_locally: bool, target_nums: int):
+    def __init__(self, homepage: str, target_nums: int):
         """
         """
         self.homepage = homepage
-        self.save_locally = save_locally
         self.target_nums = target_nums
         self.all_product_links = []
         self.all_product_info = []
@@ -211,15 +209,6 @@ class Scraper:
         item_dict['rating_avg'] = rating_avg
         item_dict['rating_nums'] = rating_nums
         item_dict['image_links'] = image_links
-        print(f'The product id is: {item_id}')
-        print(f"The product name is: {name}")
-        print(f"The link is: {link}")
-        print(f'The brand is: {brand}')
-        print(f'The price is: {price}')
-        print(f"The colour is: {colour}")
-        print(f'The average rating is: {rating_avg}')
-        print(f'The rating numbers is: {rating_nums}')
-        print(f"The image links is: {image_links}")
 
         return item_dict
     
@@ -230,7 +219,9 @@ class Scraper:
             item_dict (dict): The item dictionary to be saved
         """
         if self.save_locally == True:
+            print("Start to save josn locally...")
             self.save_json_locally(item_dict)
+            print("Start to save images locally...")
             self.download_images_locally(item_dict)
         elif self.save_locally == False:
             self.upload_data_to_rds_directly(self.engine,item_dict)
@@ -257,14 +248,24 @@ class Scraper:
                 print("This product details can't be extracted")
                 print(f"The link is {link}")
                 continue
-
-            print("---------------------------------")
-            print(f"NO.{i}",end=" ")
             #push data into a dictionary
             item_dict = self.push_data_to_dict(product_id, link)
 
-            # #save data
-            self.save_item_data(item_dict)
+            print("---------------------------------")
+            print(f"NO.{i}",end=" ")
+            print(f"The product id is: {item_dict['id']}")
+            print(f"The product name is: {item_dict['name']}")
+            print(f"The link is: {item_dict['item_link']}")
+            print(f"The brand is: {item_dict['brand']}")
+            print(f"The price is: {item_dict['price']}")
+            print(f"The colour is: {item_dict['colour']}")
+            print(f"The average rating is: {item_dict['rating_avg']}")
+            print(f"The rating numbers is: {item_dict['rating_nums']}")
+            print(f"The image links is: {item_dict['image_links']}")
+
+            if self.stream_process == True:
+                # #save data
+                self.save_item_data(item_dict)
             self.all_product_info.append(item_dict)
             self.scraped_id_list.append(product_id)
             i+=1
@@ -298,7 +299,6 @@ class Scraper:
                 self.scraped_id_list = os.listdir(self.data_folder)
             except:
                 self.scraped_id_list = []
-            # print(self.scraped_id_list)
 
         elif self.save_locally == False:
             self.engine = self.connect_to_rds()
