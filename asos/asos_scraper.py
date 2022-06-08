@@ -10,6 +10,7 @@ class AsosScraper(Scraper, TransformerMixin, LoaderMixin):
         # super().__init__(homepage, save_locally, target_nums)
     
     def run_scraper(self):
+        """Run the scraper to extract,transform and load data."""
 
         asos_scraper.get_scraped_id_list()
         asos_scraper.load_and_accept_cookie()
@@ -22,7 +23,7 @@ class AsosScraper(Scraper, TransformerMixin, LoaderMixin):
         # asos_scraper.save_all_json_locally()
         # asos_scraper.download__all_images_locally()
 
-        ##stream process -- cloud
+        #batch process -- cloud
         # asos_scraper.upload_all_data_to_rds_directly()
         # asos_scraper.upload_all_data_to_s3_directly()
 

@@ -17,6 +17,7 @@ class Scraper:
     Args:
         homepage(str): Homepage url of ASOS.
         save_locally(bool): True means save data locally, otherwise on the clound.
+        target_nums(int): The number of items to be extracted.
 
     Attributes:
         all_product_links (list): A list of all product links.
@@ -25,6 +26,7 @@ class Scraper:
         page (int): The index of page which is currently being scraped.
         data_folder (str): The name of folder where store all scraped data.
         scraped_id_list (list): The id list of products that have beed scraped.
+        engine (engine.Engine): The Engine used to connect to AWS RDS.
         chrome_options (Options): The object for customizing ChromeDriver.
         driver (webdriver.Chrome): The tool used to control Chrome browser
 
@@ -97,7 +99,7 @@ class Scraper:
         """Search in the search textbox and get to the result url.
 
         Args:
-            search_content (str): The product name to be search.
+            search_content (str): The product name to be search
         """
         print("Start to search for product...")
         search_bar = self.try_to_find_elements(
@@ -110,7 +112,7 @@ class Scraper:
         """Get the links for products in current page.
         
         Returns:
-            list: A list consist of product links in current page.  
+            list: A list consist of product links in current page  
         """
         tshirt_elements = self.try_to_find_elements(
             "//div[@data-auto-id='productList']/section/article",
@@ -137,7 +139,7 @@ class Scraper:
         """Get the links for products in all N pages.
 
         Args:
-            page_nums (int): The number of pages which to be extract links from.
+            page_nums (int): The number of pages which to be extract links from
         """
         print("Start to collect product links...")
         for i in tqdm(range(0,page_nums)):
@@ -145,7 +147,16 @@ class Scraper:
             self.all_product_links.extend(tshirt_page_links)
             self.move_to_next_page()
     
-    def push_data_to_dict(self, product_id: str, link: str) -> dict:
+    def push_data_to_dict(self, item_id: str, link: str) -> dict:
+        """Push extracted data into a dictionary.
+        
+        Args:
+            item_id (str): The id of the item
+            link (str): The link of the item
+        
+        Returns:
+            dict: The dictionary to store item data
+        """
         name_ele = self.try_to_find_elements(
                 "//div[@id='aside-content']/div/h1",
                 "name")
@@ -191,7 +202,7 @@ class Scraper:
             'rating_nums',
             'image_links'
             ])
-        item_dict['id'] = product_id
+        item_dict['id'] = item_id
         item_dict['name'] = name
         item_dict['item_link'] = link
         item_dict['brand'] = brand
@@ -200,7 +211,7 @@ class Scraper:
         item_dict['rating_avg'] = rating_avg
         item_dict['rating_nums'] = rating_nums
         item_dict['image_links'] = image_links
-        print(f'The product id is: {product_id}')
+        print(f'The product id is: {item_id}')
         print(f"The product name is: {name}")
         print(f"The link is: {link}")
         print(f'The brand is: {brand}')
@@ -213,12 +224,17 @@ class Scraper:
         return item_dict
     
     def save_item_data(self, item_dict: dict) -> None:
+        """Save item data locally or on the cloud
+
+        Args:
+            item_dict (dict): The item dictionary to be saved
+        """
         if self.save_locally == True:
             self.save_json_locally(item_dict)
             self.download_images_locally(item_dict)
         elif self.save_locally == False:
             self.upload_data_to_rds_directly(self.engine,item_dict)
-            # self.upload_data_to_s3_directly(item_dict)
+            self.upload_data_to_s3_directly(item_dict)
 
     def get_all_item_info(self) -> None:
         """ Get the product infomation for all links."""
