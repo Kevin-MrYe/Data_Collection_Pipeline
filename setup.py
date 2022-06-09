@@ -10,4 +10,5 @@ setup(name='pipelines-metrics',
            'sqlalchemy',
            'python-dotenv',
            'boto3',
+           'psycopg2',
         ])

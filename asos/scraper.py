@@ -40,7 +40,6 @@ class Scraper:
         self.page = 1
         self.scraped_id_list = []
         self.chrome_options = Options()
-        # chrome_options = Options()
         self.chrome_options.add_argument('--ignore-certificate-errors')
         self.chrome_options.add_argument('--allow-running-insecure-content')        
         self.chrome_options.add_argument('--no-sandbox')        
@@ -53,7 +52,6 @@ class Scraper:
         self.chrome_options.add_argument("window-size=1920,1080")
         self.driver = webdriver.Chrome(options=self.chrome_options)
         # self.driver = webdriver.Chrome()
-        print("Here is Scraper")
 
     def load_and_accept_cookie(self) -> None: ## return annotation
         """Open ASOS and accept the cookies."""
@@ -291,23 +289,3 @@ class Scraper:
         
 
         return item_img_links
-
-    def get_scraped_id_list(self) -> None:
-        """Get the scraped id from RDS."""
-        print("Strat to get scraped id list...")
-        if self.save_locally ==  True:
-            try:
-                self.scraped_id_list = os.listdir(self.data_folder)
-            except:
-                self.scraped_id_list = []
-
-        elif self.save_locally == False:
-            self.engine = self.connect_to_rds()
-            try:
-                df_scraped_id = pd.read_sql_query(
-                    'SELECT id FROM test_scraper',
-                     self.engine)
-
-                self.scraped_id_list = df_scraped_id['id'].values.tolist()
-            except:
-                self.scraped_id_list = []

@@ -21,7 +21,6 @@ class LoaderMixin:
     """
 
     def __init__(self):
-        print("Here is loader")
         load_dotenv()
         self.rds_table_name = 'test_scraper'
         self.s3_folder_anme = 'test_data'

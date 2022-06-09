@@ -1,7 +1,9 @@
-from typing import Tuple
+
 from scraper import Scraper
 from transformer import TransformerMixin
 from loader import LoaderMixin
+import pandas as pd
+import os
 
 
 
@@ -27,6 +29,26 @@ class AsosScraper(Scraper, TransformerMixin, LoaderMixin):
         LoaderMixin.__init__(self)
         self.save_locally = save_locally
         self.stream_process = stream_process
+
+    def get_scraped_id_list(self) -> None:
+        """Get the scraped id from RDS."""
+        print("Strat to get scraped id list...")
+        if self.save_locally ==  True:
+            try:
+                self.scraped_id_list = os.listdir(self.data_folder)
+            except:
+                self.scraped_id_list = []
+
+        elif self.save_locally == False:
+            self.engine = self.connect_to_rds()
+            try:
+                df_scraped_id = pd.read_sql_query(
+                    'SELECT id FROM test_scraper',
+                     self.engine)
+
+                self.scraped_id_list = df_scraped_id['id'].values.tolist()
+            except:
+                self.scraped_id_list = []
 
     
     def run_scraper(self):
@@ -59,7 +81,7 @@ class AsosScraper(Scraper, TransformerMixin, LoaderMixin):
 
 if __name__ == '__main__':
     #True means save data locally, Flase means save data on the cloud.
-    save_locally = False
+    save_locally = True
     #True means save data by stream, Flase means save data by batch.
     stream_process = False
     asos_scraper = AsosScraper(

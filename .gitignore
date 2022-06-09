@@ -1,5 +1,6 @@
-dir_to_ignore/
+to_ignore/
 **/__pycache__/
 .env
 asos/raw_data/
 asos/test_data/
+pipelines_metrics.egg-info/
