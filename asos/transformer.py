@@ -5,35 +5,22 @@ import json
 from urllib import request
 
 class TransformerMixin:
-
-    def create_data_folders(self) -> None:
-        """Create the data folders for different product item."""
-
-        print("Start to create folder...")
-        if not os.path.exists(self.data_folder):
-                os.makedirs(self.data_folder)
-        
-        for item_dict in tqdm(self.all_product_info):
-        
-            image_folder_path = '/'.join([
-                os.getcwd(), 
-                self.data_folder, 
-                item_dict['id'], 
-                'images'])
-            if not os.path.exists(image_folder_path):
-                os.makedirs(image_folder_path)
-
-    #save json locally by batch
-    def save_all_json_locally(self) -> None:    
-        """Save all data in local json files."""
-
-        print("Start to save josn locally...")
-        for item_dict in tqdm(self.all_product_info):
-            self.save_json_locally(item_dict)
+    """
+    A Class used to transform data to local files.
+    
+    Attributes:
+        data_folder (str): The name of folder where store all scraped data.
+    """
+    def __init__(self):
+        print("Here is transformer")
+        self.data_folder = 'asos/test_data'
     
     #save csv
     def save_csv_locally(self) -> None:
-        """Save all data to csv file locally"""
+        """Save all data to one csv file locally"""
+        if not os.path.exists(self.data_folder):
+                os.makedirs(self.data_folder)
+
         csv_path = self.data_folder+'/final_data.csv'
         df = pd.DataFrame(self.all_product_info)
         if os.path.exists(csv_path):
@@ -41,17 +28,22 @@ class TransformerMixin:
         else:
             df.to_csv(csv_path,mode='a',index=False)
     
+    #save json locally by batch
+    def save_all_json_locally(self) -> None:    
+        """Save all json files locally."""
+        for item_dict in tqdm(self.all_product_info):
+            self.save_item_json_locally(item_dict)
+
     #save images locally by batch
     def download__all_images_locally(self) -> None:
-        """Download all the images corresponding to different product item."""
+        """Download all the images locally."""
 
-        print("Start to save images locally...")
         for item_dict in tqdm(self.all_product_info):
-            self.download_images_locally(item_dict)
+            self.download_item_images_locally(item_dict)
 
     ##save data locally by stream
-    def save_json_locally(self, item_dict: dict) -> None:    
-        """Save json files corresponding to one item."""
+    def save_item_json_locally(self, item_dict: dict) -> None:    
+        """Save one json file for one item locally."""
             
         data_point_path = '/'.join([
             os.getcwd(), 
@@ -64,8 +56,8 @@ class TransformerMixin:
             json.dump(item_dict, f, indent=4)
 
     ##save data locally by stream
-    def download_images_locally(self, item_dict: dict) -> None:
-        """Download images corresponding to one item."""
+    def download_item_images_locally(self, item_dict: dict) -> None:
+        """Download one group images for one item locally."""
 
         image_folder_path = '/'.join([
             os.getcwd(), 

@@ -12,7 +12,7 @@ import pandas as pd
 
 class Scraper:
     """
-    .
+    A class used to scrape website data.
     
     Args:
         homepage(str): Homepage url of ASOS.
@@ -23,9 +23,7 @@ class Scraper:
         all_product_info (list): A list of all product information.
         delay (int): The maximum time takes to find the element.
         page (int): The index of page which is currently being scraped.
-        data_folder (str): The name of folder where store all scraped data.
         scraped_id_list (list): The id list of products that have beed scraped.
-        engine (engine.Engine): The Engine used to connect to AWS RDS.
         chrome_options (Options): The object for customizing ChromeDriver.
         driver (webdriver.Chrome): The tool used to control Chrome browser
 
@@ -40,9 +38,7 @@ class Scraper:
         self.all_product_info = []
         self.delay = 10
         self.page = 1
-        self.data_folder = 'asos/test_data'
         self.scraped_id_list = []
-        self.engine = None
         self.chrome_options = Options()
         # chrome_options = Options()
         self.chrome_options.add_argument('--ignore-certificate-errors')
@@ -57,6 +53,7 @@ class Scraper:
         self.chrome_options.add_argument("window-size=1920,1080")
         self.driver = webdriver.Chrome(options=self.chrome_options)
         # self.driver = webdriver.Chrome()
+        print("Here is Scraper")
 
     def load_and_accept_cookie(self) -> None: ## return annotation
         """Open ASOS and accept the cookies."""
@@ -211,21 +208,6 @@ class Scraper:
         item_dict['image_links'] = image_links
 
         return item_dict
-    
-    def save_item_data(self, item_dict: dict) -> None:
-        """Save item data locally or on the cloud
-
-        Args:
-            item_dict (dict): The item dictionary to be saved
-        """
-        if self.save_locally == True:
-            print("Start to save josn locally...")
-            self.save_json_locally(item_dict)
-            print("Start to save images locally...")
-            self.download_images_locally(item_dict)
-        elif self.save_locally == False:
-            self.upload_data_to_rds_directly(self.engine,item_dict)
-            self.upload_data_to_s3_directly(item_dict)
 
     def get_all_item_info(self) -> None:
         """ Get the product infomation for all links."""
@@ -245,8 +227,10 @@ class Scraper:
                 print("This product has benn scraped before")
                 continue
             elif product_id == None:
+                print('---------------------------------------')
                 print("This product details can't be extracted")
                 print(f"The link is {link}")
+                print('---------------------------------------')
                 continue
             #push data into a dictionary
             item_dict = self.push_data_to_dict(product_id, link)
@@ -265,10 +249,27 @@ class Scraper:
 
             if self.stream_process == True:
                 # #save data
-                self.save_item_data(item_dict)
+                self.save_item_by_stream(item_dict)
             self.all_product_info.append(item_dict)
             self.scraped_id_list.append(product_id)
             i+=1
+
+    def save_item_by_stream(self, item_dict: dict) -> None:
+        """Save item data locally or on the cloud
+
+        Args:
+            item_dict (dict): The item dictionary to be saved
+        """
+        if self.save_locally == True:
+            print("Start to save item josn locally...")
+            self.save_item_json_locally(item_dict)
+            print("Start to save item images locally...")
+            self.download_item_images_locally(item_dict)
+        elif self.save_locally == False:
+            print("Start to upload item data to rds...")
+            self.upload_item_data_to_rds(item_dict)
+            print("Start to upload item data to s3...")
+            self.upload_item_data_to_s3(item_dict)
 
     def get_image_links_for_item(self) -> list:
         """Get all the image links corresponding to different product item.
@@ -290,7 +291,7 @@ class Scraper:
         
 
         return item_img_links
-    
+
     def get_scraped_id_list(self) -> None:
         """Get the scraped id from RDS."""
         print("Strat to get scraped id list...")

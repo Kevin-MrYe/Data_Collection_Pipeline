@@ -20,8 +20,11 @@ class AsosScraper(Scraper, TransformerMixin, LoaderMixin):
             save_locally: bool, 
             stream_process: bool, 
             target_nums: int):
+        print("Here is asosScraper")
 
-        super().__init__(homepage, target_nums)
+        Scraper.__init__(self,homepage,target_nums)
+        TransformerMixin.__init__(self)
+        LoaderMixin.__init__(self)
         self.save_locally = save_locally
         self.stream_process = stream_process
 
@@ -38,13 +41,17 @@ class AsosScraper(Scraper, TransformerMixin, LoaderMixin):
         if self.stream_process == False:
             if self.save_locally == True:
                 #batch process -- locally
-                asos_scraper.save_all_json_locally()
                 asos_scraper.save_csv_locally()
+                print("Strat to save all json locally...")
+                asos_scraper.save_all_json_locally()
+                print("Strat to download all images locally...")
                 asos_scraper.download__all_images_locally()
             elif self.save_locally == False:
                 # batch process -- cloud
-                asos_scraper.upload_all_data_to_rds_directly()
-                asos_scraper.upload_all_data_to_s3_directly()
+                print("Strat to upload all data to rds...")
+                asos_scraper.upload_all_data_to_rds()
+                print("Strat to upload all data to s3...")
+                asos_scraper.upload_all_data_to_s3()
 
 
 
@@ -57,7 +64,7 @@ if __name__ == '__main__':
         "https://www.asos.com/",
         save_locally,
         stream_process,
-        10)
+        20)
     asos_scraper.run_scraper()
     
     
