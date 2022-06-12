@@ -1,8 +1,6 @@
 import unittest
 from unittest.mock import patch
 from asos.scraper import Scraper
-from asos.transformer import TransformerMixin
-from asos.loader import LoaderMixin
 
 class TestScraper(unittest.TestCase):
     @classmethod

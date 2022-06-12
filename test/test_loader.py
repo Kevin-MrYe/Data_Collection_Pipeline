@@ -2,7 +2,6 @@ import unittest
 from unittest import mock
 from unittest.mock import patch
 from asos.loader import LoaderMixin
-from moto import mock_s3
 
 class TestLoaderMixinn(unittest.TestCase):
     @classmethod

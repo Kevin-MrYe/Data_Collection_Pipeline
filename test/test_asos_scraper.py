@@ -18,6 +18,7 @@ class TestAsosScraper(unittest.TestCase):
     @patch('asos.asos_scraper.os.listdir')
     @patch.object(AsosScraper,'connect_to_rds')
     def test_get_scraped_id_list_locally(self,mock_conn, mock_listdir, mock_read_sql):
+        self.asos_scraper.save_locally = True
         self.asos_scraper.get_scraped_id_list()
         mock_listdir.assert_called()
         mock_conn.assert_not_called()
