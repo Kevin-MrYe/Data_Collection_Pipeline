@@ -15,7 +15,6 @@ class LoaderMixin:
     Attributes:
         rds_table_name (str): The table name of rds which stores data.
         s3_folder_name (str): The folder name of s3 bucket which stores data.
-        s3_client (client.S3): The client which manipulates S3 bucket.
         bucket_name (str) : The name of bucket which stores data. 
         engine (engine.Engine): The Engine used to connect to AWS RDS.
     """
@@ -24,10 +23,8 @@ class LoaderMixin:
         load_dotenv()
         self.rds_table_name = 'test_scraper'
         self.s3_folder_anme = 'test_data'
-        self.s3_client = boto3.client('s3')
         self.bucket_name = os.getenv('BUCKET_NAME')
         self.engine = self.connect_to_rds()
-        print(type(self.s3_client))
 
     def connect_to_rds(self) -> engine.Engine:
         """Connect to AWS RDS using sqlalchemy.
@@ -87,11 +84,11 @@ class LoaderMixin:
         Args:
             item_dict (dict): The dictionary to be uploaded to AWS S3.
         """
-
+        s3_client = boto3.client('s3')
         ##upload json data to S3
         json_object = json.dumps(item_dict, indent=4)
         json_path = os.path.join(self.s3_folder_anme,item_dict['id'],'data.json')
-        self.s3_client.put_object(
+        s3_client.put_object(
             Body=json_object, 
             Bucket=self.bucket_name, 
             Key=json_path)
@@ -103,7 +100,7 @@ class LoaderMixin:
             img_object = request.urlopen(link).read()
             img_name = str(i)+'.jpg'
             img_path = os.path.join(self.s3_folder_anme,item_dict['id'],'images',img_name)
-            self.s3_client.put_object(
+            s3_client.put_object(
                 Body=img_object, 
                 Bucket=self.bucket_name, 
                 Key=img_path)
@@ -118,13 +115,13 @@ class LoaderMixin:
 
     def upload_data_folder_to_s3(self) -> None:
         """Upload data floder to S3 bucket."""
-
+        s3_client = boto3.client('s3')
         print("Start to upload data folder to S3")
         for root, dirs, files in os.walk(self.data_folder):
             for filename in files:
 
                 local_path = os.path.join(root,filename)
-                self.s3_client.upload_file(
+                s3_client.upload_file(
                     local_path, 
                     self.bucket_name, 
                     local_path)

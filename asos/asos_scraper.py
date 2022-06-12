@@ -1,7 +1,7 @@
 
-from scraper import Scraper
-from transformer import TransformerMixin
-from loader import LoaderMixin
+from .scraper import Scraper
+from .transformer import TransformerMixin
+from .loader import LoaderMixin
 import pandas as pd
 import os
 
@@ -22,7 +22,6 @@ class AsosScraper(Scraper, TransformerMixin, LoaderMixin):
             save_locally: bool, 
             stream_process: bool, 
             target_nums: int):
-        print("Here is asosScraper")
 
         Scraper.__init__(self,homepage,target_nums)
         TransformerMixin.__init__(self)
@@ -54,26 +53,28 @@ class AsosScraper(Scraper, TransformerMixin, LoaderMixin):
     def run_scraper(self):
         """Run the scraper to extract,transform and load data."""
 
-        asos_scraper.get_scraped_id_list()
-        asos_scraper.load_and_accept_cookie()
-        asos_scraper.search_for("T-shirt for men")
-        asos_scraper.get_n_page_item_links(1)
-        asos_scraper.get_all_item_info()
+        self.get_scraped_id_list()
+        self.load_and_accept_cookie()
+        self.search_for("T-shirt for men")
+        self.get_n_page_item_links(1)
+        self.get_all_item_info()
+        self.save_if_batch_process()
 
+    def save_if_batch_process(self):
         if self.stream_process == False:
             if self.save_locally == True:
                 #batch process -- locally
-                asos_scraper.save_csv_locally()
+                self.save_csv_locally()
                 print("Strat to save all json locally...")
-                asos_scraper.save_all_json_locally()
+                self.save_all_json_locally()
                 print("Strat to download all images locally...")
-                asos_scraper.download__all_images_locally()
+                self.download__all_images_locally()
             elif self.save_locally == False:
                 # batch process -- cloud
                 print("Strat to upload all data to rds...")
-                asos_scraper.upload_all_data_to_rds()
+                self.upload_all_data_to_rds()
                 print("Strat to upload all data to s3...")
-                asos_scraper.upload_all_data_to_s3()
+                self.upload_all_data_to_s3()
 
 
 
@@ -89,6 +90,7 @@ if __name__ == '__main__':
         save_locally,
         stream_process,
         20)
-    asos_scraper.run_scraper()
+    # asos_scraper.run_scraper()
+    print(os.walk('asos/raw_data'))
     
     

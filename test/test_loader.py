@@ -2,7 +2,7 @@ import unittest
 from unittest import mock
 from unittest.mock import patch
 from asos.loader import LoaderMixin
-import boto3
+from moto import mock_s3
 
 class TestLoaderMixinn(unittest.TestCase):
     @classmethod
@@ -28,17 +28,33 @@ class TestLoaderMixinn(unittest.TestCase):
         result = self.loader.upload_all_data_to_rds()
         self.assertEqual(result,10)
 
-    @patch('botocore.client.S3.put_object')
     @patch('asos.loader.request.urlopen')
-    @patch('asos.loader.json.dumps')
-    def test_upload_item_data_to_s3(self,mock_dumps, mock_urlopen,mock_put_object):
-        item_dict = {'id':'00001','image_links':[1,2,3]}
-        self.loader.upload_item_data_to_s3(item_dict)
-        mock_dumps.assert_called()
-        mock_urlopen.assert_called()
-        mock_put_object.assert_called()
-        
+    @patch('asos.loader.os.path.join')
+    @patch('asos.loader.boto3.client')
+    def test_upload_item_data_to_s3(self,mock_client,mock_join,mock_urlopen,):
 
+        item_dict = {'id':'00001','image_links':[1,2,3]}
+
+        # mock_urlopen.return_value.read.return_value = 'put_img'
+        mock_join.return_value = True
+        mock_urlopen.return_value.read.return_value = True
+        self.loader.upload_item_data_to_s3(item_dict)
+        self.assertTrue(mock_client.return_value.put_object.call_count == 4)
+
+    @patch.object(LoaderMixin,'upload_item_data_to_s3')
+    def test_upload_all_data_to_s3(self, mock_upload_item_data_to_s3):
+        self.loader.all_product_info = range(0,10)
+        self.loader.upload_all_data_to_s3()
+        self.assertEqual(mock_upload_item_data_to_s3.call_count,10)
+
+    @patch('asos.loader.os.walk')
+    @patch('asos.loader.boto3.client')
+    def test_upload_data_folder_to_s3(self, mock_client,mock_walk):
+        self.loader.data_folder = True
+        mock_walk.return_value = [('1','2',['3','4','5'])]
+        self.loader.upload_data_folder_to_s3()
+        mock_client.assert_called()
+        mock_client.return_value.upload_file.assert_called()
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

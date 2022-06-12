@@ -1,6 +1,8 @@
 import unittest
 from unittest.mock import patch
 from asos.scraper import Scraper
+from asos.transformer import TransformerMixin
+from asos.loader import LoaderMixin
 
 class TestScraper(unittest.TestCase):
     @classmethod
@@ -72,6 +74,7 @@ class TestScraper(unittest.TestCase):
         if self.scraper.all_product_info != []:
             for i in range(0,len(self.scraper.all_product_info)):
                 self.assertIsInstance(self.scraper.all_product_info[i],dict)
+
 
     def test_get_image_links_for_item(self):
         product_detail_url = '''https://www.asos.com/tommy-hilfiger/tommy-hilfiger-authentic
