@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy import engine
-from dotenv import load_dotenv
+import yaml
 import boto3
 import os
 import pandas as pd
@@ -20,11 +20,14 @@ class LoaderMixin:
     """
 
     def __init__(self):
-        load_dotenv()
-        self.rds_database_name = 'asos_scraper'
+        with open('config/rds_creds.yaml','r') as f:
+            self.rds_creds = yaml.safe_load(f)
+        with open('config/s3_creds.yaml','r') as f:
+            s3_creds = yaml.safe_load(f)
         self.rds_table_name = 'test_scraper'
         self.s3_folder_anme = 'test_data'
-        self.bucket_name = os.getenv('BUCKET_NAME')
+        self.bucket_name = s3_creds['BUCKET_NAME']
+        print(self.bucket_name)
         self.engine = self.connect_to_rds()
 
     def connect_to_rds(self) -> engine.Engine:
@@ -33,15 +36,16 @@ class LoaderMixin:
         Returns:
             sqlalchemy.engine.Engine: The Engine used to connect to AWS RDS.
         """
-        DATABASE_TYPE = 'postgresql'
-        DBAPI = 'psycopg2'
-        ENDPOINT = os.getenv('RDS_ENDPOINT')
-        USER = 'postgres'
-        PASSWORD = os.getenv('RDS_PASSWORD')
-        DATABASE = self.rds_database_name
-        PORT = 5432
+        DATABASE_TYPE = self.rds_creds['DATABASE_TYPE']
+        DBAPI = self.rds_creds['DBAPI']
+        ENDPOINT = self.rds_creds['ENDPOINT']
+        USER = self.rds_creds['USER']
+        PASSWORD = self.rds_creds['PASSWORD']
+        DATABASE = self.rds_creds['DATABASE']
+        PORT = self.rds_creds['PORT']
         path = (f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@"
                 +f"{ENDPOINT}:{PORT}/{DATABASE}")
+        print(path)
         engine = create_engine(path)
 
         return engine

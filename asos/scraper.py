@@ -106,12 +106,12 @@ class Scraper:
         Returns:
             list: A list consist of product links in current page  
         """
-        tshirt_elements = self.try_to_find_elements(
+        item_elements = self.try_to_find_elements(
             "//div[@data-auto-id='productList']/section/article",
             "tshirt_elements")
         page_link_list = []
-        for tshirt in tshirt_elements:
-            a_tag = tshirt.find_element(By.TAG_NAME,'a')
+        for item in item_elements:
+            a_tag = item.find_element(By.TAG_NAME,'a')
             item_link = a_tag.get_attribute('href')
             page_link_list.append(item_link)
         self.page += 1
@@ -135,8 +135,8 @@ class Scraper:
         """
         print("Start to collect product links...")
         for i in tqdm(range(0,page_nums)):
-            tshirt_page_links = self.get_one_page_item_links()
-            self.all_product_links.extend(tshirt_page_links)
+            item_page_links = self.get_one_page_item_links()
+            self.all_product_links.extend(item_page_links)
             self.move_to_next_page()
     
     def push_data_to_dict(self, item_id: str, link: str) -> dict:

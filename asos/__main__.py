@@ -8,6 +8,6 @@ asos_scraper = AsosScraper(
     "https://www.asos.com/",
     save_locally,
     stream_process,
-    20)
+    10)
 asos_scraper.run_scraper()
     
