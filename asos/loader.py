@@ -21,6 +21,7 @@ class LoaderMixin:
 
     def __init__(self):
         load_dotenv()
+        self.rds_database_name = 'asos_scraper'
         self.rds_table_name = 'test_scraper'
         self.s3_folder_anme = 'test_data'
         self.bucket_name = os.getenv('BUCKET_NAME')
@@ -37,7 +38,7 @@ class LoaderMixin:
         ENDPOINT = os.getenv('RDS_ENDPOINT')
         USER = 'postgres'
         PASSWORD = os.getenv('RDS_PASSWORD')
-        DATABASE = 'asos_scraper'
+        DATABASE = self.rds_database_name
         PORT = 5432
         path = (f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@"
                 +f"{ENDPOINT}:{PORT}/{DATABASE}")
