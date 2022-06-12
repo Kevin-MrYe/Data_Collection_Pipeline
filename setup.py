@@ -10,5 +10,6 @@ setup(name='pipelines-metrics',
            'sqlalchemy',
            'python-dotenv',
            'boto3',
-           'psycopg2',
+           'psycopg2-binary',
+           'htmltestrunner-rv',
         ])
