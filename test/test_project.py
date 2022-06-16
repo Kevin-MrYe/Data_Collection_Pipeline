@@ -1,9 +1,9 @@
 import unittest
 from HTMLTestRunner import HTMLTestRunner
-from test_scraper import TestScraper
-from test_transformer import TestTransformerMixin
-from test_loader import TestLoaderMixinn
-from test_asos_scraper import TestAsosScraper
+from .test_scraper import TestScraper
+from .test_transformer import TestTransformerMixin
+from .test_loader import TestLoaderMixinn
+from .test_asos_scraper import TestAsosScraper
 
 
 def test_suite():
