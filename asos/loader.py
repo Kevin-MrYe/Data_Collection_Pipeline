@@ -20,14 +20,11 @@ class LoaderMixin:
     """
 
     def __init__(self):
-        with open('config/rds_creds.yaml','r') as f:
-            self.rds_creds = yaml.safe_load(f)
-        with open('config/s3_creds.yaml','r') as f:
-            s3_creds = yaml.safe_load(f)
+        with open('/home/kevin/.aws/s3_creds.yaml','r') as f:
+            self.s3_creds = yaml.safe_load(f)
         self.rds_table_name = 'test_scraper'
         self.s3_folder_anme = 'test_data'
-        self.bucket_name = s3_creds['BUCKET_NAME']
-        print(self.bucket_name)
+        self.bucket_name = self.s3_creds['BUCKET_NAME']
         self.engine = self.connect_to_rds()
 
     def connect_to_rds(self) -> engine.Engine:
@@ -36,16 +33,17 @@ class LoaderMixin:
         Returns:
             sqlalchemy.engine.Engine: The Engine used to connect to AWS RDS.
         """
-        DATABASE_TYPE = self.rds_creds['DATABASE_TYPE']
-        DBAPI = self.rds_creds['DBAPI']
-        ENDPOINT = self.rds_creds['ENDPOINT']
-        USER = self.rds_creds['USER']
-        PASSWORD = self.rds_creds['PASSWORD']
-        DATABASE = self.rds_creds['DATABASE']
-        PORT = self.rds_creds['PORT']
+        with open('/home/kevin/.aws/rds_creds.yaml','r') as f:
+            rds_creds = yaml.safe_load(f)
+        DATABASE_TYPE = rds_creds['DATABASE_TYPE']
+        DBAPI = rds_creds['DBAPI']
+        ENDPOINT = rds_creds['ENDPOINT']
+        USER = rds_creds['USER']
+        PASSWORD = rds_creds['PASSWORD']
+        DATABASE = rds_creds['DATABASE']
+        PORT = rds_creds['PORT']
         path = (f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@"
                 +f"{ENDPOINT}:{PORT}/{DATABASE}")
-        print(path)
         engine = create_engine(path)
 
         return engine
@@ -89,7 +87,11 @@ class LoaderMixin:
         Args:
             item_dict (dict): The dictionary to be uploaded to AWS S3.
         """
-        s3_client = boto3.client('s3')
+        s3_client = boto3.client(
+            's3',
+            aws_access_key = self.s3_creds['aws_access_key_id'],
+            aws_secret_access_key= self.s3_creds['aws_secret_access_key']
+            )
         ##upload json data to S3
         json_object = json.dumps(item_dict, indent=4)
         json_path = os.path.join(self.s3_folder_anme,item_dict['id'],'data.json')

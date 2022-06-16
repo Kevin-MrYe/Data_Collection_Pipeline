@@ -1,13 +1,15 @@
 from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver import ChromeOptions
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.proxy import Proxy, ProxyType
 from tqdm import tqdm
-import os
-import pandas as pd
+import numpy as np
 
 class Scraper:
     """
@@ -16,6 +18,7 @@ class Scraper:
     Args:
         homepage(str): Homepage url of ASOS.
         target_nums(int): The number of items to be extracted.
+        stream_process(bool): True memas save data by stream,otherwise not save.
 
     Attributes:
         all_product_links (list): A list of all product links.
@@ -28,35 +31,53 @@ class Scraper:
 
 
     """
-    def __init__(self, homepage: str, target_nums: int):
-        """
-        """
+    def __init__(self, 
+        homepage: str, 
+        target_nums: int, 
+        stream_process: bool = False):
+        """Please see help(Scraper) for more info."""
         self.homepage = homepage
         self.target_nums = target_nums
+        self.stream_process = stream_process
         self.all_product_links = []
         self.all_product_info = []
         self.delay = 10
         self.page = 1
         self.scraped_id_list = []
-        self.chrome_options = Options()
-        self.chrome_options.add_argument('--ignore-certificate-errors')
-        self.chrome_options.add_argument('--allow-running-insecure-content')        
-        self.chrome_options.add_argument('--no-sandbox')        
-        self.chrome_options.add_argument('--headless')       
-        self.chrome_options.add_argument('--disable-dev-shm-usage')
-        self.chrome_options.add_argument("user-agent='Mozilla/5.0 \
-        (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) \
-        Chrome/93.0.4577.63 Safari/537.36'")
+        path = "user-agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005 Safari/537.36'"
+        options = Options()      
+        options.add_argument('--no-sandbox')        
+        options.add_argument('--headless')       
+        options.add_argument('--disable-dev-shm-usage')
+        options.add_argument("--disable-setuid-sandbox") 
+        options.add_argument('--disable-gpu')
+        options.add_argument("--start-maximized")
+        options.add_argument('--ignore-certificate-errors')
+        options.add_argument('--allow-running-insecure-content')
+        options.add_argument(path)
+        # with open("config/proxy_list.txt") as f:
+        #     proxy_list = f.readlines()
+        # proxy = np.random.choice(proxy_list).strip()
+        PROXY = '34.145.226.144:8080'
+        options.add_argument('--proxy-server=%s' % PROXY)
 
-        self.chrome_options.add_argument("window-size=1920,1080")
-        self.driver = webdriver.Chrome(options=self.chrome_options)
+        self.driver = webdriver.Chrome(
+            ChromeDriverManager().install(),
+            options = options,
+            )
         # self.driver = webdriver.Chrome()
+    def get_ip_address(self):
+        self.driver.get("http://checkip.amazonaws.com/")
+        # time.sleep(10)
+        body_text = self.driver.find_element(by=By.TAG_NAME,value='body').text
+        print(f"Current ip:{body_text}")
 
     def load_and_accept_cookie(self) -> None: ## return annotation
         """Open ASOS and accept the cookies."""
         print("Start to load and accept cookie...")
         try:
             self.driver.get(self.homepage)
+            self.driver.save_screenshot('/home/ubuntu/load.png')
             accept_cookies_button = self.try_to_find_elements(
                 "//button[@id='onetrust-accept-btn-handler']",
                 "accept cookie button")[0]
@@ -81,7 +102,7 @@ class Scraper:
                         until(EC.presence_of_all_elements_located(
                         (By.XPATH, element_path)))
         except TimeoutException:
-            print(f"Loading {element_name} took too much time"+
+            print(f"Loading {element_name} took too much time. "+
                 "check the element path!")
             element = []
         return element
@@ -99,6 +120,8 @@ class Scraper:
             "search textbox")[0]
         search_bar.send_keys(search_content)
         search_bar.send_keys(Keys.RETURN)
+        self.driver.save_screenshot('/home/ubuntu/search.png')
+        a = input("Press any key to strart..")
 
     def get_one_page_item_links(self) -> list:
         """Get the links for products in current page.
@@ -232,17 +255,17 @@ class Scraper:
             #push data into a dictionary
             item_dict = self.push_data_to_dict(product_id, link)
 
-            print("---------------------------------")
-            print(f"NO.{i}",end=" ")
-            print(f"The product id is: {item_dict['id']}")
-            print(f"The product name is: {item_dict['name']}")
-            print(f"The link is: {item_dict['item_link']}")
-            print(f"The brand is: {item_dict['brand']}")
-            print(f"The price is: {item_dict['price']}")
-            print(f"The colour is: {item_dict['colour']}")
-            print(f"The average rating is: {item_dict['rating_avg']}")
-            print(f"The rating numbers is: {item_dict['rating_nums']}")
-            print(f"The image links is: {item_dict['image_links']}")
+            # print("---------------------------------")
+            # print(f"NO.{i}",end=" ")
+            # print(f"The product id is: {item_dict['id']}")
+            # print(f"The product name is: {item_dict['name']}")
+            # print(f"The link is: {item_dict['item_link']}")
+            # print(f"The brand is: {item_dict['brand']}")
+            # print(f"The price is: {item_dict['price']}")
+            # print(f"The colour is: {item_dict['colour']}")
+            # print(f"The average rating is: {item_dict['rating_avg']}")
+            # print(f"The rating numbers is: {item_dict['rating_nums']}")
+            # print(f"The image links is: {item_dict['image_links']}")
 
             if self.stream_process == True:
                 # #save data

@@ -1,7 +1,6 @@
-
-from scraper import Scraper
-from transformer import TransformerMixin
-from loader import LoaderMixin
+from .scraper import Scraper
+from .transformer import TransformerMixin
+from .loader import LoaderMixin
 import pandas as pd
 import os
 
@@ -52,7 +51,7 @@ class AsosScraper(Scraper, TransformerMixin, LoaderMixin):
     
     def run_scraper(self):
         """Run the scraper to extract,transform and load data."""
-
+        self.get_ip_address()
         self.get_scraped_id_list()
         self.load_and_accept_cookie()
         self.search_for("T-shirt for men")
@@ -75,6 +74,8 @@ class AsosScraper(Scraper, TransformerMixin, LoaderMixin):
                 self.upload_all_data_to_rds()
                 print("Strat to upload all data to s3...")
                 self.upload_all_data_to_s3()
+            elif self.save_locally == None:
+                pass
 
 
 
@@ -82,15 +83,14 @@ class AsosScraper(Scraper, TransformerMixin, LoaderMixin):
 
 if __name__ == '__main__':
     #True means save data locally, Flase means save data on the cloud.
-    save_locally = True
+    save_locally = False
     #True means save data by stream, Flase means save data by batch.
-    stream_process = False
+    stream_process = True
     asos_scraper = AsosScraper(
         "https://www.asos.com/",
         save_locally,
         stream_process,
-        20)
-    # asos_scraper.run_scraper()
-    print(os.walk('asos/raw_data'))
+        10)
+    asos_scraper.run_scraper()
     
     
