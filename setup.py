@@ -1,15 +1,10 @@
 from setuptools import setup,find_packages
 
-setup(name='pipelines-metrics',
+with open('requirements.txt') as f:
+    required = f.read().splitlines()
+
+setup(name='kevin-pipeline',
        version='1.0',
        packages=find_packages(),
-       install_requires=[
-           'selenium',
-           'tqdm',
-           'pandas',
-           'sqlalchemy',
-           'pyyaml',
-           'boto3',
-           'psycopg2-binary',
-           'htmltestrunner-rv',
-        ])
+       install_requires=required
+       )
