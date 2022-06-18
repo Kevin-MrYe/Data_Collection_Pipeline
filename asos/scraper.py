@@ -10,6 +10,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.proxy import Proxy, ProxyType
 from tqdm import tqdm
 import numpy as np
+import time
 
 class Scraper:
     """
@@ -47,7 +48,7 @@ class Scraper:
         path = "user-agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005 Safari/537.36'"
         options = Options()      
         options.add_argument('--no-sandbox')        
-        options.add_argument('--headless')       
+        # options.add_argument('--headless')       
         options.add_argument('--disable-dev-shm-usage')
         options.add_argument("--disable-setuid-sandbox") 
         options.add_argument('--disable-gpu')
@@ -58,8 +59,9 @@ class Scraper:
         # with open("config/proxy_list.txt") as f:
         #     proxy_list = f.readlines()
         # proxy = np.random.choice(proxy_list).strip()
-        PROXY = '34.145.226.144:8080'
+        PROXY = '191.101.148.179:45785'
         options.add_argument('--proxy-server=%s' % PROXY)
+        # options.add_argument(f'--proxy-server="http={PROXY};https={PROXY}"')
 
         self.driver = webdriver.Chrome(
             ChromeDriverManager().install(),
@@ -67,8 +69,10 @@ class Scraper:
             )
         # self.driver = webdriver.Chrome()
     def get_ip_address(self):
+        # self.driver.get("https://whatismyipaddress.com/")
+        # body_text = self.driver.find_element(by=By.ID,value='ipv4').textc
+        time.sleep(5)
         self.driver.get("http://checkip.amazonaws.com/")
-        # time.sleep(10)
         body_text = self.driver.find_element(by=By.TAG_NAME,value='body').text
         print(f"Current ip:{body_text}")
 
