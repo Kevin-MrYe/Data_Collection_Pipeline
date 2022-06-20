@@ -45,33 +45,28 @@ class Scraper:
         self.delay = 10
         self.page = 1
         self.scraped_id_list = []
-        path = "user-agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005 Safari/537.36'"
+        user_agent = "user-agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005 Safari/537.36'"
         options = Options()      
         options.add_argument('--no-sandbox')        
-        # options.add_argument('--headless')       
+        options.add_argument('--headless')       
         options.add_argument('--disable-dev-shm-usage')
         options.add_argument("--disable-setuid-sandbox") 
         options.add_argument('--disable-gpu')
         options.add_argument("--start-maximized")
         options.add_argument('--ignore-certificate-errors')
         options.add_argument('--allow-running-insecure-content')
-        options.add_argument(path)
+        options.add_argument(user_agent)
         # with open("config/proxy_list.txt") as f:
         #     proxy_list = f.readlines()
         # proxy = np.random.choice(proxy_list).strip()
-        PROXY = '191.101.148.179:45785'
+        PROXY = '193.233.175.49:45785'
         options.add_argument('--proxy-server=%s' % PROXY)
-        # options.add_argument(f'--proxy-server="http={PROXY};https={PROXY}"')
 
         self.driver = webdriver.Chrome(
             ChromeDriverManager().install(),
             options = options,
             )
-        # self.driver = webdriver.Chrome()
     def get_ip_address(self):
-        # self.driver.get("https://whatismyipaddress.com/")
-        # body_text = self.driver.find_element(by=By.ID,value='ipv4').textc
-        time.sleep(5)
         self.driver.get("http://checkip.amazonaws.com/")
         body_text = self.driver.find_element(by=By.TAG_NAME,value='body').text
         print(f"Current ip:{body_text}")
