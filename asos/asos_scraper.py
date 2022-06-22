@@ -83,7 +83,7 @@ class AsosScraper(Scraper, TransformerMixin, LoaderMixin):
 
 if __name__ == '__main__':
     #True means save data locally, Flase means save data on the cloud.
-    save_locally = False
+    save_locally = True
     #True means save data by stream, Flase means save data by batch.
     stream_process = True
     asos_scraper = AsosScraper(

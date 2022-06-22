@@ -59,8 +59,7 @@ class Scraper:
         # with open("config/proxy_list.txt") as f:
         #     proxy_list = f.readlines()
         # proxy = np.random.choice(proxy_list).strip()
-        PROXY = '193.233.175.49:45785'
-        options.add_argument('--proxy-server=%s' % PROXY)
+        # options.add_argument('--proxy-server=%s' % proxy)
 
         self.driver = webdriver.Chrome(
             ChromeDriverManager().install(),
