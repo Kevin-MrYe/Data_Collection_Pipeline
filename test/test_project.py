@@ -35,8 +35,11 @@ def test_suite():
 
         )
 
-    #run the test suite using HTMLTestRunner
-    runner.run(test_suite)
+    # #run the test suite using HTMLTestRunner
+    # runner.run(test_suite)
+
+    #run the test suite using TextTestRunner
+    unittest.TextTestRunner(verbosity=2).run(test_suite)
 
 if __name__ == '__main__':
     test_suite()

@@ -119,7 +119,7 @@ class Scraper:
         search_bar.send_keys(search_content)
         search_bar.send_keys(Keys.RETURN)
         self.driver.save_screenshot('/home/ubuntu/search.png')
-        a = input("Press any key to strart..")
+        # a = input("Press any key to strart..")
 
     def get_one_page_item_links(self) -> list:
         """Get the links for products in current page.
