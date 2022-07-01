@@ -56,10 +56,10 @@ class Scraper:
         options.add_argument('--ignore-certificate-errors')
         options.add_argument('--allow-running-insecure-content')
         options.add_argument(user_agent)
-        # with open("config/proxy_list.txt") as f:
-        #     proxy_list = f.readlines()
-        # proxy = np.random.choice(proxy_list).strip()
-        # options.add_argument('--proxy-server=%s' % proxy)
+        with open("config/proxy_list.txt") as f:
+            proxy_list = f.readlines()
+        proxy = np.random.choice(proxy_list).strip()
+        options.add_argument('--proxy-server=%s' % proxy)
 
         self.driver = webdriver.Chrome(
             ChromeDriverManager().install(),
