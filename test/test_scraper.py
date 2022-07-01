@@ -53,7 +53,7 @@ class TestScraper(unittest.TestCase):
     def test_push_data_to_dict(self):
         item_link = "https://www.asos.com/tommy-hilfiger/tommy-hilfiger-embroidered-flag-logo-t-shirt-in-white/prd/12591347?clr=snow-white&colourWayId=16396295&SearchQuery=t-shirt+for+men"
         self.scraper.driver.get(item_link)
-        item_dict = self.scraper.push_data_to_dict('111','link')
+        item_dict = self.scraper.push_data_to_dict('111','////link')
         self.assertIsInstance(item_dict,dict)
 
     def test_get_all_item_info(self):
