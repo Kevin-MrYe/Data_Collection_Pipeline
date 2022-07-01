@@ -45,14 +45,14 @@ class Scraper:
         self.delay = 10
         self.page = 1
         self.scraped_id_list = []
-        user_agent = "user-agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005 Safari/537.36'"
+        user_agent = "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005 Safari/537.36"
         options = Options()      
         options.add_argument('--no-sandbox')        
         options.add_argument('--headless')       
         options.add_argument('--disable-dev-shm-usage')
         options.add_argument("--disable-setuid-sandbox") 
         options.add_argument('--disable-gpu')
-        options.add_argument("--start-maximized")
+        options.add_argument("--window-size=1920,1080")
         options.add_argument('--ignore-certificate-errors')
         options.add_argument('--allow-running-insecure-content')
         options.add_argument(user_agent)
@@ -173,9 +173,9 @@ class Scraper:
         name_ele = self.try_to_find_elements(
                 "//div[@id='aside-content']/div/h1",
                 "name")
-        brand_ele = self.try_to_find_elements(
-            "//div[@class='product-description']/p[1]/a[2]/strong",
-            "brand")
+        # brand_ele = self.try_to_find_elements(
+        #     "//div[@id='productDescriptionDetails']//a[2]/strong",
+        #     "brand")
         price_ele = self.try_to_find_elements(
             "//span[@data-id='current-price']",
             "price")
@@ -188,7 +188,7 @@ class Scraper:
             By.XPATH,"//div[@class='total-reviews']")
 
         name = name_ele[0].text if name_ele != [] else None
-        brand = brand_ele[0].text if brand_ele != [] else None
+        brand = link.split('/')[3].replace('-',' ')
         colour = colour_ele[0].text if colour_ele != [] else None
         rating_avg = rating_avg_ele[0].text if rating_avg_ele != [] else None
         if price_ele != []:
@@ -232,15 +232,22 @@ class Scraper:
         print("Start to extract product information...")
         if len(self.all_product_links) < self.target_nums:
             raise ValueError("The target nums can't be less than link nums")
-        i=1
-        for link in tqdm(self.all_product_links[0:self.target_nums]):
+        collect_nums = 0
+        progress_bar = tqdm(range(self.target_nums))
+
+        for link in self.all_product_links:
 
             self.driver.get(link)
+            self.driver.save_screenshot('config/test.png')
             #check whether the id was scraped before
-            product_id_ele = self.try_to_find_elements(
-                "//div[@class='product-code']/p[1]",
-                "product_id")
-            product_id = product_id_ele[0].text if product_id_ele != [] else None
+            # product_id_ele = self.try_to_find_elements(
+            #     "//div[@id='productDescriptionDetails']//p[1]",
+            #     "product_id")
+            # if product_id_ele != []:
+            #     product_id = product_id_ele[0].text.replace("Product Code: ","")
+            # else:
+            #     product_id = None
+            product_id = (link.split('?'))[0].split('prd/')[1]
             if product_id in self.scraped_id_list:
                 print("This product has benn scraped before")
                 continue
@@ -254,7 +261,7 @@ class Scraper:
             item_dict = self.push_data_to_dict(product_id, link)
 
             # print("---------------------------------")
-            # print(f"NO.{i}",end=" ")
+            # print(f"NO.{collect_nums}",end=" ")
             # print(f"The product id is: {item_dict['id']}")
             # print(f"The product name is: {item_dict['name']}")
             # print(f"The link is: {item_dict['item_link']}")
@@ -270,7 +277,12 @@ class Scraper:
                 self.save_item_by_stream(item_dict)
             self.all_product_info.append(item_dict)
             self.scraped_id_list.append(product_id)
-            i+=1
+            collect_nums+=1
+            progress_bar.update(1)
+            progress_bar.refresh()
+            if collect_nums == self.target_nums:
+                progress_bar.close()
+                break
 
     def save_item_by_stream(self, item_dict: dict) -> None:
         """Save item data locally or on the cloud
