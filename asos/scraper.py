@@ -1,3 +1,4 @@
+from random import randint
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
@@ -5,12 +6,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException
-from selenium.webdriver import ChromeOptions
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.proxy import Proxy, ProxyType
 from tqdm import tqdm
-import numpy as np
-import time
+
 
 class Scraper:
     """
@@ -58,7 +56,7 @@ class Scraper:
         options.add_argument(user_agent)
         with open("config/proxy_list.txt") as f:
             proxy_list = f.readlines()
-        proxy = np.random.choice(proxy_list).strip()
+        proxy = proxy_list[randint(0,len(proxy_list)-1)].strip()
         options.add_argument('--proxy-server=%s' % proxy)
 
         self.driver = webdriver.Chrome(
