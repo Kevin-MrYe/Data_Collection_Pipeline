@@ -3,6 +3,7 @@ from .transformer import TransformerMixin
 from .loader import LoaderMixin
 import pandas as pd
 import os
+import math
 
 
 
@@ -55,7 +56,9 @@ class AsosScraper(Scraper, TransformerMixin, LoaderMixin):
         self.get_scraped_id_list()
         self.load_and_accept_cookie()
         self.search_for("T-shirt for men")
-        self.get_n_page_item_links(1)
+        page_num = (len(self.scraped_id_list)+self.target_nums)/72
+        page_int = math.ceil(page_num)
+        self.get_n_page_item_links(page_int)
         self.get_all_item_info()
         self.save_if_batch_process()
 
