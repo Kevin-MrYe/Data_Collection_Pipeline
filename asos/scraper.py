@@ -238,7 +238,7 @@ class Scraper:
         for link in self.all_product_links:
 
             self.driver.get(link)
-            self.driver.save_screenshot('config/test.png')
+            # self.driver.save_screenshot('config/test.png')
             #check whether the id was scraped before
             # product_id_ele = self.try_to_find_elements(
             #     "//div[@id='productDescriptionDetails']//p[1]",
