@@ -4,5 +4,4 @@ config/
 asos/raw_data/
 asos/test_data/
 test/test_report/
-pipelines_metrics.egg-info/
 .dockerignore
