@@ -3,6 +3,40 @@ As shopping online becomes a household lifestyle, ecommerce affects people in al
 
 For any e-commerence business, it is important to analyse competitor's product information, including brand, prices, review scores, review numbers and product photos. This is a web scraper project which scrapes product information from [ASOS website](https://www.asos.com/). 
 
+## Table of Contents
+* [Project Overview](#project-overview)
+* [Classes Design](#classes-design)
+* [Methods Design](#methods-design)
+* [Unit Testing](#unit-testing)
+* [Containerising and Cloud Deployment](#containerising-and-cloud-deployment)
+* [Monitoring](#monitoring)
+* [CI/CD pipelines](#cicd-pipelines)
+* [Conclusion](#conclusion)
+* [Future Improvements](#future-improvements)
+
+## Project Overview
+
+## Classes Design
+
+## Methods Design
+
+## Unit Testing
+
+## Containerising and Cloud Deployment
+
+## Monitoring
+
+## CI/CD pipelines
+
+## Conclusion
+
+## Future Improvements
+
+
+
+
+
+
 The following is project structure:
 ```
 .
