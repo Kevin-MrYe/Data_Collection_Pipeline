@@ -1,0 +1,6 @@
+to_ignore/
+**/__pycache__/
+config/
+asos/raw_data/
+asos/test_data/
+test/test_report/
