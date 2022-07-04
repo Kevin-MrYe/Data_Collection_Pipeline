@@ -4,4 +4,3 @@ config/
 asos/raw_data/
 asos/test_data/
 test/test_report/
-.dockerignore
