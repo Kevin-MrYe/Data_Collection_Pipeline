@@ -3,4 +3,30 @@ As shopping online becomes a household lifestyle, ecommerce affects people in al
 
 For any e-commerence business, it is important to analyse competitor's product information, including brand, prices, review scores, review numbers and product photos. This is a web scraper project which scrapes product information from [ASOS website](https://www.asos.com/). 
 
-
+The following is project structure:
+```bash
+.
+├── .github
+│   └── workflows
+├── asos
+│   ├── __init__.py
+│   ├── __main__.py
+│   ├── asos_scraper.py
+│   ├── loader.py
+│   ├── scraper.py
+│   └── transformer.py
+├── test
+│   ├── __init__.py
+│   ├── test_asos_scraper.py
+│   ├── test_loader.py
+│   ├── test_project.py
+│   ├── test_scraper.py
+│   └── test_transformer.py
+├── .dockerignore
+├── .gitignore
+├── Dockerfile
+├── LICENSE
+├── README.md
+├── requirements.txt
+└── setup.py
+```
