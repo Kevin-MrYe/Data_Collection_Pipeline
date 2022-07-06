@@ -15,28 +15,7 @@ For any e-commerence business, it is important to analyse competitor's product i
 * [Future Improvements](#future-improvements)
 
 ## Project Overview
-
-## Classes Design
-
-## Methods Design
-
-## Unit Testing
-
-## Containerising and Cloud Deployment
-
-## Monitoring
-
-## CI/CD pipelines
-
-## Conclusion
-
-## Future Improvements
-
-
-
-
-
-
+To make the project structure more clear, all scraper related modules are included in the asos folder and all the test module are included in the test folder. In addition to this, methods with different functionality are included in different class files.
 The following is project structure:
 ```
 .
@@ -64,3 +43,23 @@ The following is project structure:
 ├── requirements.txt
 └── setup.py
 ```
+
+## Classes Design
+
+## Methods Design
+
+## Unit Testing
+
+## Containerising and Cloud Deployment
+
+## Monitoring
+
+## CI/CD pipelines
+
+## Conclusion
+
+## Future Improvements
+
+
+
+
