@@ -15,8 +15,10 @@ For any e-commerence business, it is important to analyse competitor's product i
 * [Future Improvements](#future-improvements)
 
 ## Project Overview
+<img src ="https://github.com/Kevin-MrYe/Data_Collection_Pipeline/blob/main/asos/img/overview.png" width = '700px'>
 To make the project structure more clear, all scraper related modules are included in the asos folder and all the test module are included in the test folder. In addition to this, methods with different functionality are included in different class files.
 The following is project structure:
+
 ```
 .
 ├── .github
@@ -45,8 +47,10 @@ The following is project structure:
 ```
 
 ## Classes Design
+<img src ="https://github.com/Kevin-MrYe/Data_Collection_Pipeline/blob/main/asos/img/classes_design.png" width = '700px'>
 
 ## Methods Design
+<img src ="https://github.com/Kevin-MrYe/Data_Collection_Pipeline/blob/main/asos/img/methods_design.png" width = '700px'>
 
 ## Unit Testing
 
