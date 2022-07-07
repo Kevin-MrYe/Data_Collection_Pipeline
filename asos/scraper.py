@@ -236,17 +236,11 @@ class Scraper:
 
         for link in self.all_product_links:
 
-            self.driver.get(link)
-            # self.driver.save_screenshot('config/test.png')
-            #check whether the id was scraped before
-            # product_id_ele = self.try_to_find_elements(
-            #     "//div[@id='productDescriptionDetails']//p[1]",
-            #     "product_id")
-            # if product_id_ele != []:
-            #     product_id = product_id_ele[0].text.replace("Product Code: ","")
-            # else:
-            #     product_id = None
-            product_id = (link.split('?'))[0].split('prd/')[1]
+            try:
+                product_id = (link.split('?'))[0].split('prd/')[1]
+            except: 
+                product_id = None
+                
             if product_id in self.scraped_id_list:
                 print("This product has benn scraped before")
                 continue
@@ -257,6 +251,7 @@ class Scraper:
                 print('---------------------------------------')
                 continue
             #push data into a dictionary
+            self.driver.get(link)
             item_dict = self.push_data_to_dict(product_id, link)
 
             # print("---------------------------------")
