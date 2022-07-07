@@ -15,8 +15,9 @@ For any e-commerence business, it is important to analyse competitor's product i
 * [Future Improvements](#future-improvements)
 
 ## Project Overview
-<img src ="https://github.com/Kevin-MrYe/Data_Collection_Pipeline/blob/main/asos/img/overview.png" width = '700px'>
 The scraper will extract information from target website and then store tabular data on AWS RDS and store other format data on AWS S3. To make this project can be implemented on any OS system, this application was containerised using docker. The scraper will deployed on AWS EC2 instance, that means that will not consume resourse of local machine. Finally, the docker container metrics and EC2 metrics was monitored by Prometheus and visualized by Grafana.
+
+<img src ="https://github.com/Kevin-MrYe/Data_Collection_Pipeline/blob/main/asos/img/overview.png" width = '700px'>
 
 
 To make the project structure more clear, all scraper related modules are included in the asos folder and all the test module are included in the test folder. In addition to this, methods with different functionality are included in different class files.
@@ -53,21 +54,21 @@ The following is project structure:
 <img src ="https://github.com/Kevin-MrYe/Data_Collection_Pipeline/blob/main/asos/img/classes_design.png" width = '700px'>
 Python does not have interfaces, but by using multiple inheritance, there is a similar mechanism in Python is referred to as a mixin. a mixin is a class that contains methods for use by other classes without having to be the parent class of those other classes. In this project, there are four classes as follows:
 
-* Scraper(Extractor)
+* __Scraper(Extractor)__
 
-The base class can be regarded as Extractor of ETL, which can extract information from website. In addition, it includes some interactive actions with broswer, e.g. accept cookie, searching and turn to next page.
+    The base class can be regarded as Extractor of ETL, which can extract information from website. In addition, it includes some interactive actions with broswer, e.g. accept cookie, searching and turn to next page.
 
-* TransformaerMixin
+* __TransformaerMixin__
 
-The Mixin can be regardes as Transformer of ETL, which can tranform the infortiom in dictionary into local files.
+    The Mixin can be regardes as Transformer of ETL, which can tranform the infortiom in dictionary into local files.
 
-* LoderMixin
+* __LoderMixin__
 
-The Mixin can be regarded as Loder of ETL, which can load the data to the cloud.
+    The Mixin can be regarded as Loder of ETL, which can load the data to the cloud.
 
-* AsosScraper
+* __AsosScraper__
 
-The AsosScraper will inherited from the first three classes, so that it can be a multifunctional scraper.
+    The AsosScraper will inherited from the first three classes, so that it can be a multifunctional scraper.
 
 Generally speaking, TransformaerMixin and LoderMixin will not be instantiated directly, they are only supplementary to the class to increase the functions of transformation and loading.
 
