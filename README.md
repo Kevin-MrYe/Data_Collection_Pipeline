@@ -79,10 +79,10 @@ To achieve separation of concerns, each method is designed to perform a single f
 <img src ="https://github.com/Kevin-MrYe/Data_Collection_Pipeline/blob/main/asos/img/methods_design.png" width = '700px'>
 The AsosScraper constructor has four arguments:
 
-- homepage
-- save_locally
-- stream_process
-- target_nums
+- homepage: Homepage url of ASOS
+- save_locally: True means save data locally, otherwise on the cloud
+- stream_process: True means stream process, otherwise batch process 
+- target_nums: The number of items to be extracted
 
 ## Unit Testing
 
