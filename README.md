@@ -193,6 +193,15 @@ CMD [ "python","-m","asos.asos_scraper" ]
 At first the project is built from Python:3.8, but it will cost too much space because most of the modules will not be used. Therefore using Python:3.8-slim-buster to replace Python:3.8. Then install the google chrome to run the scraper.
 The next step is copy everything in the Dockerfile directory inside the docker container. One more thing is to install dependencies so that scraper can work well.
 
+After checking the dockerfile, run the following code to build and push the image to the docker hub:
+```
+docker build -t mrkevinye/asos_scraper:latest .
+docker push mrkevinye/asos_scraper:latest
+```
+
+To run this docker image on EC2 instance, need to install docker on EC2 instance first.
+
+
 ## 6.Monitoring
 
 ## 7.CI/CD pipelines
