@@ -200,6 +200,15 @@ docker push mrkevinye/asos_scraper:latest
 ```
 
 To run this docker image on EC2 instance, need to install docker on EC2 instance first.
+```
+sudo apt-get update
+sudo apt-get install docker.io
+```
+
+Finally run the scraper container on EC2 instance:
+```
+docker run --name scraper --rm -v /home/kevin/.aws:/home/kevin/.aws mrkevinye/asos_scraper:latest
+```
 
 
 ## 6.Monitoring
