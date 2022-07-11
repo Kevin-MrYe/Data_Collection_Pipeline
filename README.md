@@ -171,6 +171,27 @@ The following is the screenshot the test report:
 <img src="https://github.com/Kevin-MrYe/Data_Collection_Pipeline/blob/main/asos/img/test_report.png" width=700px>
 
 ## 5.Containerising and Cloud Deployment
+To give this application more scalability, containerize the application through Docker so that the application can run in any environment.
+
+Docker images are essentially a set of steps that Docker engine will take to create the environment where will run the application. Those steps are declared in Dockerfile, which is a special type of file that Docker will look for to build an image. The following is the dockerfile that build our scraper image:
+```
+FROM python:3.8-slim-buster
+
+RUN apt-get update && apt-get install -y gnupg\
+    && apt-get install -y wget \
+    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -\
+    && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'\
+    && apt-get -y update\
+    && apt-get install -y google-chrome-stable
+
+COPY . .
+
+RUN pip install -r requirements.txt
+
+CMD [ "python","-m","asos.asos_scraper" ]
+```
+At first the project is built from Python:3.8, but it will cost too much space because most of the modules will not be used. Therefore using Python:3.8-slim-buster to replace Python:3.8. Then install the google chrome to run the scraper.
+The next step is copy everything in the Dockerfile directory inside the docker container. One more thing is to install dependencies so that scraper can work well.
 
 ## 6.Monitoring
 
