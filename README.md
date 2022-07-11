@@ -259,7 +259,29 @@ scrape_configs:
       - targets: ['172.17.0.1:9323']
 ```
 
+Finally run the prometheus on EC2 instance:
+```
+sudo docker run --rm -d \
+    --network=host \
+    --name prometheus\
+    -v /root/prometheus.yml:/etc/prometheus/prometheus.yml \
+    prom/prometheus \
+    --config.file=/etc/prometheus/prometheus.yml \
+    --web.enable-lifecycle 
+```
+
+The Grafana could get metrics from Node Exporter and Docker, then generate visualization:
+<img src="https://github.com/Kevin-MrYe/Data_Collection_Pipeline/blob/main/asos/img/prometheus.png" width=700px>
+
+
 ## 7.CI/CD pipelines
+### Github Actions
+GitHub Actions allow us to automate various stages of software development. Whenever we make changes to the code, we always need to do a code test to make sure that the changes are correct without creating other bugs. Therefore, this project creates a workflow with two jobs:
+1. When code is pushed or pull requests to the main branch, execute unit tests.
+2. When code is pushed or pull requests to the main branch, build the docker image and push to the docker hub.
+
+Details about the workflow can be seen [here](https://github.com/Kevin-MrYe/Data_Collection_Pipeline/blob/main/.github/workflows/scraper_ci.yml).
+### Crontab
 
 ## 8.Conclusion
 
