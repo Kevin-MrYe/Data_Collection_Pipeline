@@ -93,9 +93,8 @@ Either save_locally or stream_process has two options. So there are four modes o
 Batch process means processing all the data in one time in the final stage. However, Stream process means processing data item by item. Although sometimes batch process has higher average process speed, stream process will be more stable. If batch process and there is an error before uploading data, all data will lose. 
 
 
-
-
 ## 4.Unit Testing
+As the project grows, adding more functionality to the flexible code can cause problems. Testing is the process of verifying that software behaves as expected. A lower level of granularity is unit testing. Unit testing is used to test a single unit of code. This project uses Python's built-in Unittest module to implement unit testing.
 
 ## 5.Containerising and Cloud Deployment
 
