@@ -305,6 +305,7 @@ CRON_TZ=Europe/London
 Usually, Cron jobs run using the local time defined in the system. Sometime we may prefer to run the Cron job in a different timezone without necessarily changing the server's time and date. By setting TZ = Europe/London, this project will run the scraper at 10:00 everyday at London timezone.
 
 ## 8.Conclusion
+This project starts with basic class design, and has gone through web scraping, unit testing, containerization, cloud deployment, application monitoring, visualization, and automation tasks. Having achieved a truly automated scraper, it was exciting to successfully complete this project. Many difficulties have finally been overcome, and I need to thank Aicore engineers for their guidance and explanations about questions from Aicore mates.
 
 ## 9.Future Improvements
 
