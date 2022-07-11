@@ -308,7 +308,18 @@ Usually, Cron jobs run using the local time defined in the system. Sometime we m
 This project starts with basic class design, and has gone through web scraping, unit testing, containerization, cloud deployment, application monitoring, visualization, and automation tasks. Having achieved a truly automated scraper, it was exciting to successfully complete this project. Many difficulties have finally been overcome, and I need to thank Aicore engineers for their guidance and explanations about questions from Aicore mates.
 
 ## 9.Future Improvements
+While this project has implemented all the features required by the course, there are some advanced features that are expected to be optimized in the future.
+1. Design a more flexible scraper class. 
 
+    Currently, scraping data depends on the XPATH of the element. If changing the target web page, we need to modify the corresponding XPATH in the class method.
+    
+2. Combining Selenium and BeautifulSoup. 
+
+    This project is based on Selenium, because some web page interactions need to use Selenium. For some static web page parsing, using BeautifulSoup may have faster speed. Combination of Selenium and BeautifulSoup would be a good choice.
+
+3. Rotating ip and user agent. 
+
+    Most commercial websites have anti-crawling mechanisms, and using the same IP to crawl a large amount of data may be in danger of being blocked. Rotating ip and user agent will reduce the probability of being blocked.
 
 
 
