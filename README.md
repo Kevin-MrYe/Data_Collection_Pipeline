@@ -233,6 +233,32 @@ sudo systemctl enable node-exporter
 sudo systemctl start node-exporter
 sudo systemctl status node-exporter
 ```
+### Configure prometheus yaml
+```
+global:
+  scrape_interval: 10s
+  external_labels:
+    monitor: 'codelab-monitor'
+
+scrape_configs:
+  # The job name added as a label `job=<job_name>` to any timeseries scraped
+  - job_name: 'prometheus'
+    scrape_interval: '5s'
+    static_configs:
+      - targets: ['localhost:9090','18.134.5.215:9090']
+
+  #node_exporter
+  - job_name: 'node_exporter'
+    
+    static_configs:
+      - targets: ['18.134.5.215:9100']
+
+  #docker
+  - job_name: 'docker'
+    static_configs:
+      - targets: ['172.17.0.1:9323']
+```
+
 ## 7.CI/CD pipelines
 
 ## 8.Conclusion
