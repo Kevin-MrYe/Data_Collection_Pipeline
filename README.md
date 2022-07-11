@@ -214,6 +214,25 @@ It's not wise to put credential in a docker image, because if making the image p
 ## 6.Monitoring
 Prometheus is an open source monitoring and alerting toolkit for gathering and processing data locally. This project will monitor EC2 instance metrics and Docker container metrics. Node exporter is a prometheus exporter for hardware and OS metrics exposed by \*NIX kernels, written in Go with pluggable metric collectors.
 
+### Run Node exporter on AWS EC2
+* Create a user for Prometheus Node Exporter
+```
+sudo useradd --no-create-home node_exporter
+```
+* install Node Exporter binaries
+```
+wget https://github.com/prometheus/node_exporter/releases/download/v1.0.1/node_exporter-1.0.1.linux-amd64.tar.gz
+tar xzf node_exporter-1.0.1.linux-amd64.tar.gz
+sudo cp node_exporter-1.0.1.linux-amd64/node_exporter /usr/local/bin/node_exporter
+rm -rf node_exporter-1.0.1.linux-amd64.tar.gz node_exporter-1.0.1.linux-amd64
+```
+* Create a service and configure systemd
+```
+sudo systemctl daemon-reload
+sudo systemctl enable node-exporter
+sudo systemctl start node-exporter
+sudo systemctl status node-exporter
+```
 ## 7.CI/CD pipelines
 
 ## 8.Conclusion
