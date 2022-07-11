@@ -12,7 +12,7 @@ class AsosScraper(Scraper, TransformerMixin, LoaderMixin):
 
     Args:
         homepage(str): Homepage url of ASOS.
-        save_locally(bool): True means save data locally, otherwise on the clound.
+        save_locally(bool): True means save data locally, otherwise on the cloud.
         stream_process(bool): True means stream process, otherwise batch process.
         target_nums(int): The number of items to be extracted.
     """
