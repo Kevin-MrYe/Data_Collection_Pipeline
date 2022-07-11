@@ -281,7 +281,28 @@ GitHub Actions allow us to automate various stages of software development. When
 2. When code is pushed or pull requests to the main branch, build the docker image and push to the docker hub.
 
 Details about the workflow can be seen [here](https://github.com/Kevin-MrYe/Data_Collection_Pipeline/blob/main/.github/workflows/scraper_ci.yml).
+
 ### Crontab
+Running the scraper manually is not considered as true automation. This project triggers the scraper periodically by setting up Cron jobs. Since this project uses Linux in an EC2 instance, scheduled tasks can be managed through Crontab.
+
+In order to be able to run the latest scraper every day, the cron job must be able to delete the old image, pull the latest image from the docker hub and run it. Here is the script that should run:
+
+```
+#/home/kevin/scraper.sh
+EXPORT TZ=Europe/London
+
+/usr/bin/docker rmi mrkevinye/asos_scraper:latest;
+/usr/bin/docker run --name scraper --rm -v /home/kevin/.aws:/home/kevin/.aws mrkevinye/asos_scraper:latest
+```
+
+Then the Cron job is as follows:
+```
+CRON_TZ=Europe/London
+
+0 10 * * * /home/kevin/scraper.sh
+
+```
+Usually, Cron jobs run using the local time defined in the system. Sometime we may prefer to run the Cron job in a different timezone without necessarily changing the server's time and date. By setting TZ = Europe/London, this project will run the scraper at 10:00 everyday at London timezone.
 
 ## 8.Conclusion
 
