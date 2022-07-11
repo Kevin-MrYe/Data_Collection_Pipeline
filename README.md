@@ -76,6 +76,8 @@ Generally speaking, TransformaerMixin and LoderMixin will not be instantiated di
 ## 3.Methods Design
 To achieve separation of concerns, each method is designed to perform a single function. The purpose of modularization is to make the program structure clearer and to make testing more accurate. The methods of all class are listed from the following figure:
 
+<img src='https://github.com/Kevin-MrYe/Data_Collection_Pipeline/blob/main/asos/img/methods_design.png' width=700px>
+
 The AsosScraper constructor has four arguments:
 
 - homepage: Homepage url of ASOS
