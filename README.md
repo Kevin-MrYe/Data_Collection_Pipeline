@@ -51,7 +51,7 @@ The following is project structure:
 ```
 
 ## Classes Design
-<img src ="https://github.com/Kevin-MrYe/Data_Collection_Pipeline/blob/main/asos/img/classes_design.png" width = '700px'>
+<img src ="https://github.com/Kevin-MrYe/Data_Collection_Pipeline/blob/main/asos/img/classes_design.png" width = '500px'>
 Python does not have interfaces, but by using multiple inheritance, there is a similar mechanism in Python is referred to as a mixin. a mixin is a class that contains methods for use by other classes without having to be the parent class of those other classes. In this project, there are four classes as follows:
 
 * __Scraper(Extractor)__
@@ -74,7 +74,15 @@ Generally speaking, TransformaerMixin and LoderMixin will not be instantiated di
 
 
 ## Methods Design
+To achieve separation of concerns, each method is designed to perform a single function. The purpose of modularization is to make the program structure clearer and to make testing more accurate. The methods of all class are listed from the following figure:
+
 <img src ="https://github.com/Kevin-MrYe/Data_Collection_Pipeline/blob/main/asos/img/methods_design.png" width = '700px'>
+The AsosScraper constructor has four arguments:
+
+- homepage: Homepage url of ASOS
+- save_locally: True means save data locally, otherwise on the cloud
+- stream_process: True means stream process, otherwise batch process 
+- target_nums: The number of items to be extracted
 
 ## Unit Testing
 
