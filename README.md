@@ -96,6 +96,29 @@ Batch process means processing all the data in one time in the final stage. Howe
 ## 4.Unit Testing
 As the project grows, adding more functionality to the flexible code can cause problems. Testing is the process of verifying that software behaves as expected. A lower level of granularity is unit testing. Unit testing is used to test a single unit of code. This project uses Python's built-in Unittest module to implement unit testing.
 
+For regular method, given an input, test the functionality of the method by comparing the expected and actual results.
+For methods with external dependencies, mocking is recommended. The purpose of mocking is to isolate and focus on the code under test, not the behavior or state of the external dependencies.
+
+An example of testing regular method:
+```python
+def test_search_for(self):
+    self.scraper.driver.get("https://www.asos.com/")
+    self.scraper.search_for("T-Shirt For Women")
+    expected_url = "https://www.asos.com/search/?q=t-shirt+for+women"
+    result_url = self.scraper.driver.current_url
+    self.assertEqual(expected_url, result_url)
+```
+An example of testing with mocking
+```python
+@patch('asos.loader.pd.DataFrame.to_sql')
+def test_upload_item_data_to_rds(self, mock_to_sql):
+    item_dict = {'id':'AAA'}
+    mock_to_sql.return_value = 1
+    result = self.loader.upload_item_data_to_rds(item_dict)
+    self.assertEqual(result,1)
+```
+
+
 ## 5.Containerising and Cloud Deployment
 
 ## 6.Monitoring
