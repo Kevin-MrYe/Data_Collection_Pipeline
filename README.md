@@ -118,6 +118,8 @@ def test_upload_item_data_to_rds(self, mock_to_sql):
     self.assertEqual(result,1)
 ```
 
+For testing for each test class, TestSuite was used to create a test suite which combines all the test cases. In addition, using HTMLTestRunner-rv module to generate HTML report for the testcase. 
+The [HTMLTestRunner](https://ravikiranb36.github.io/htmltestrunner-rv.github.io/api-documentation/#class-htmltestrunner) provides easy way to generate HTML Test Reports, which is easy to find errors and reduce the debug time.
 
 ## 5.Containerising and Cloud Deployment
 
