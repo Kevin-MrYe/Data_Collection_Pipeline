@@ -94,6 +94,50 @@ Either save_locally or stream_process has two options. So there are four modes o
 ### Batch process Vs Stream process
 Batch process means processing all the data in one time in the final stage. However, Stream process means processing data item by item. Although sometimes batch process has higher average process speed, stream process will be more stable. If batch process and there is an error before uploading data, all data will lose. 
 
+Here is an example about uploading row data to AWS RDS:
+```python
+ def upload_item_data_to_rds(self, item_dict: dict) -> int:
+    """Upload one item data to AWS RDS.
+
+    Args:
+        item_dict (dict): The dictionary to be uploaded to AWS RDS.
+
+    Returns:
+        int: Number of rows affected by to_sql
+    """
+    df = pd.DataFrame.from_dict(item_dict,orient='index').transpose()
+    df.set_index('id',inplace=True)
+    affected_rows = df.to_sql(self.rds_table_name, self.engine, if_exists='append')
+    return affected_rows
+```
+An example about uploading item data to AWS S3:
+```python
+ def upload_item_data_to_s3(self, item_dict: dict) -> None:
+    """Upload json and images for one itme to S3..
+
+    Args:
+        item_dict (dict): The dictionary to be uploaded to AWS S3.
+    """
+    s3_client = boto3.client(
+        's3',
+        aws_access_key_id = self.s3_creds['aws_access_key_id'],
+        aws_secret_access_key = self.s3_creds['aws_secret_access_key']
+        )
+    ##upload json data to S3
+    json_object = json.dumps(item_dict, indent=4)
+    json_path = os.path.join(self.s3_folder_anme,item_dict['id'],'data.json')
+    s3_client.put_object(Body=json_object, Bucket=self.bucket_name, Key=json_path)
+
+    ##Upload images data to S3
+    image_links = item_dict['image_links']
+    i=0
+    for link in image_links:
+        img_object = request.urlopen(link).read()
+        img_name = str(i)+'.jpg'
+        img_path = os.path.join(self.s3_folder_anme,item_dict['id'],'images',img_name)
+        s3_client.put_object(Body=img_object, Bucket=self.bucket_name, Key=img_path)
+        i +=1
+```
 
 ## 4.Unit Testing
 As the project grows, adding more functionality to the flexible code can cause problems. Testing is the process of verifying that software behaves as expected. A lower level of granularity is unit testing. Unit testing is used to test a single unit of code. This project uses Python's built-in Unittest module to implement unit testing.
@@ -110,7 +154,7 @@ def test_search_for(self):
     result_url = self.scraper.driver.current_url
     self.assertEqual(expected_url, result_url)
 ```
-An example of testing with mocking
+An example of testing with mocking:
 ```python
 @patch('asos.loader.pd.DataFrame.to_sql')
 def test_upload_item_data_to_rds(self, mock_to_sql):
